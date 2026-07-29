@@ -15,7 +15,11 @@ export function useGuestSignIn() {
     const { error } = await supabase.auth.signInAnonymously();
     if (error) {
       setBusy(false);
-      toast.error("The guest demo is taking a breather — try signing in instead.");
+      // Surface the real reason — almost always "Anonymous sign-ins are
+      // disabled" until it's turned on in the Supabase dashboard — instead
+      // of a generic message that hides the actual fix needed.
+      console.error("[Guest sign-in] Supabase error:", error.message, error);
+      toast.error(`Guest demo unavailable: ${error.message}`);
       return;
     }
     window.location.href = "/";
