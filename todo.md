@@ -1,4 +1,4 @@
-# Clover Farm TODO
+# Clover AI TODO
 
 - [x] Initialize project with static template
 - [x] Build Clover Wellness home page with auth wall, onboarding wizard, dashboard, voice logger, recipes, travel sourcing, and integrations
