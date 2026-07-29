@@ -1,4 +1,4 @@
-import { getLoginUrl, INVITE_CODE_STORAGE_KEY } from "@/const";
+import { INVITE_CODE_STORAGE_KEY } from "@/const";
 import { supabase } from "@/lib/supabaseClient";
 import { trpc } from "@/lib/trpc";
 import { TRPCClientError } from "@trpc/client";
@@ -10,7 +10,9 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
+  // "/login" — the in-app sign-in screen (GitHub + guest option), never a
+  // direct jump to GitHub's OAuth page.
+  const { redirectOnUnauthenticated = false, redirectPath = "/login" } =
     options ?? {};
   const utils = trpc.useUtils();
 

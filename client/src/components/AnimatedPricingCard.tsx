@@ -2,7 +2,6 @@ import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
-import { getLoginUrl } from "@/const";
 
 interface PricingPlan {
   name: string;
@@ -51,7 +50,7 @@ export function AnimatedPricingCard({ plan, delay }: AnimatedPricingCardProps) {
       </CardHeader>
       <CardContent>
         <a
-          href={getLoginUrl()}
+          href="/login"
           className={`w-full py-3 rounded-lg font-semibold transition mb-8 block text-center ${
             plan.ctaVariant === "default"
               ? "bg-green-600 text-white hover:bg-green-700"

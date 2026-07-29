@@ -6,7 +6,7 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
-import { getLoginUrl, INVITE_CODE_STORAGE_KEY } from "./const";
+import { INVITE_CODE_STORAGE_KEY } from "./const";
 import "./index.css";
 
 // After a Supabase OAuth redirect, stash any pending invite code (passed
@@ -37,7 +37,8 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  window.location.href = getLoginUrl();
+  // "/login" — the in-app sign-in screen, not a direct jump to GitHub.
+  window.location.href = "/login";
 };
 
 queryClient.getQueryCache().subscribe(event => {

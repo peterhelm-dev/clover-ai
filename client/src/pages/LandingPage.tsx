@@ -4,9 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { supabase } from "@/lib/supabaseClient";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { GuestSignInButton } from "@/components/GuestSignInButton";
 import {
   Mic,
   BarChart3,
@@ -26,34 +24,6 @@ import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { AnimatedFeatureCard } from "@/components/AnimatedFeatureCard";
 import { AnimatedPricingCard } from "@/components/AnimatedPricingCard";
 import { TestimonialCard } from "@/components/TestimonialCard";
-
-/**
- * Guest demo: anonymous Supabase session, no signup — straight into the
- * logger with 10 free AI analyses. Show, don't tell.
- */
-function GuestDemoButton() {
-  const [busy, setBusy] = useState(false);
-  return (
-    <button
-      type="button"
-      disabled={busy}
-      onClick={async () => {
-        setBusy(true);
-        const { error } = await supabase.auth.signInAnonymously();
-        if (error) {
-          setBusy(false);
-          toast.error("The guest demo is taking a breather — try 'Get early access' instead.");
-          return;
-        }
-        window.location.href = "/";
-      }}
-      className="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold flex items-center justify-center gap-2 group disabled:opacity-70"
-    >
-      {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-      Try it right now — no signup
-    </button>
-  );
-}
 
 // Asset URLs for generated images
 const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663588202014/hU9uCPSS7HGW4CDwXkxoga/hero-background-NnGEqfKJ4rFnfvwpoqp2Ck.webp";
@@ -193,13 +163,13 @@ function Header() {
         </nav>
         <div className="flex items-center gap-3">
           <a
-            href={getLoginUrl()}
+            href="/login"
             className="text-gray-700 hover:text-green-600 transition font-medium"
           >
             Sign in
           </a>
           <a
-            href={getLoginUrl()}
+            href="/login"
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
           >
             Get started free
@@ -240,7 +210,7 @@ function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <GuestDemoButton />
+            <GuestSignInButton />
             <a
               href={getLoginUrl()}
               className="px-8 py-4 border-2 border-green-200 text-green-700 rounded-lg hover:bg-green-50 transition font-semibold flex items-center justify-center gap-2 group"
@@ -374,7 +344,7 @@ function Footer() {
             <ul className="space-y-2 text-sm">
               <li><a href="/features" className="hover:text-green-400 transition">Features</a></li>
               <li><a href="#pricing" className="hover:text-green-400 transition">Pricing</a></li>
-              <li><a href={getLoginUrl()} className="hover:text-green-400 transition">Sign in</a></li>
+              <li><a href="/login" className="hover:text-green-400 transition">Sign in</a></li>
             </ul>
           </div>
           <div>

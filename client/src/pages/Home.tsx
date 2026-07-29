@@ -1870,17 +1870,17 @@ export default function Home() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Leaf className="h-6 w-6" />
             </div>
-            <h2 className="text-3xl font-serif font-bold tracking-tight">Clover Wellness</h2>
+            <h2 className="text-3xl font-serif font-bold tracking-tight">Clover AI</h2>
             <p className="text-sm text-muted-foreground">
-              The zero-friction, voice-activated wellness and seasonal meal companion.
+              Your session ended. Sign back in to keep tracking your nutrition.
             </p>
           </div>
           <Button
-            onClick={() => { window.location.href = getLoginUrl(); }}
+            onClick={() => { window.location.href = "/login"; }}
             className="w-full h-11 gap-3"
           >
             <Leaf className="h-5 w-5" />
-            Sign in with GitHub
+            Sign in
           </Button>
           <p className="text-center text-xs text-muted-foreground">
             By continuing, you agree to Clover's Terms of Service and Privacy Policy.
@@ -2248,7 +2248,7 @@ export default function Home() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={logout}
+            onClick={async () => { await logout(); window.location.href = "/login"; }}
             className="w-full justify-start gap-2 text-xs text-muted-foreground hover:text-destructive"
           >
             <LogOut className="h-4 w-4" /> Log Out

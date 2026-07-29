@@ -9,6 +9,7 @@ import LandingPage from "./pages/LandingPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import BetaInvitePage from "./pages/BetaInvitePage";
 import PassRedeemPage from "./pages/PassRedeemPage";
+import LoginPage from "./pages/LoginPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import FeaturesPage from "./pages/FeaturesPage";
@@ -45,6 +46,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={RootRoute} />
+      <Route path="/login" component={LoginPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/beta/:code" component={BetaInvitePage} />
       <Route path="/pass/:code" component={PassRedeemPage} />
