@@ -1,52 +1,47 @@
-# Clover AI Food Planner: Curation Philosophy & Architecture
+# Clover AI: Product Philosophy
 
-When standard AI models are asked to plan a meal, they act as generalists. They pull from generic, global recipe databases, recommending ingredients that are out of season, shipped from thousands of miles away, or impossible to source locally. They prioritize convenience over regional food integrity.
-
-The **Clover AI Food Planner** operates under a fundamentally different paradigm. It is built as a **curated, local-first culinary engine** designed specifically to align household planning with real-world regional food availability.
+Most food-tracking apps are built around a spreadsheet mindset: log every gram, hit your targets, feel bad when you miss a day. That model burns people out. Clover is built on the opposite premise — **logging should take seconds, and the app should never make you feel judged for a missed day.**
 
 ---
 
-## 1. The Core Curation Philosophy
+## 1. The Core Principles
 
-Unlike generic LLMs, Clover AI does not hallucinate ingredients. It is governed by three strict curation pillars:
+### A. Say it, don't enter it
+The primary interaction is a chat: speak or type what you ate, in your own words ("had a big bowl of oatmeal with walnuts this morning"). Clover extracts the food, quantities, macros, and a full vitamin/mineral estimate — no dropdowns, no per-ingredient forms, no barcode scanning.
 
-### A. Grounded in Seasonal Realism
-The planner is anchored to a local agricultural calendar. If a user in Concord, NH requests a meal plan in June, the system will prioritize cold-hardy greens, radishes, asparagus, and early-season strawberries. It will not suggest fresh butternut squash or local apples, which are autumn crops.
+### B. Logging is retrospective-friendly
+Real life doesn't happen in real time. Clover treats a single message describing several meals ("oatmeal this morning, sandwich for lunch") as first-class, splitting it into separate logs with rough time-of-day placement (breakfast ≈ 8:00, lunch ≈ 12:30, etc.) — never demanding an exact clock time.
 
-### B. Micro-Regional Traceability
-Every ingredient recommended is mapped to actual local growers and farm stands in the Concord area. The AI acts as a concierge, telling the user: *"You can cook this heirloom tomato salad because Maple Hill Farm in East Concord has them ripening right now, and you can pick them up at their farm stand on Thursday."*
+### C. Inform without shaming
+No streaks. No red bars for missed days. No "you failed to hit your protein goal" framing. Trends are computed only over the days you actually logged, and that's stated explicitly rather than hidden. A partial week still produces a positive, useful picture.
 
-### C. Zero-Waste Culinary Logic
-The planner is designed to utilize ingredients across multiple meals to prevent household waste. If a recipe calls for half a bunch of baby kale, the system automatically schedules a secondary meal later in the week that utilizes the remaining kale.
+### D. The AI is a companion, not a form processor
+The same chat that logs your food also answers questions about it — "how's my iron been this week?", "why am I so tired lately?" — grounded in your real logged data, not generic advice. It's one conversation, not a logger bolted onto a separate chatbot.
 
----
+### E. Route to humans when it matters
+Clover will point at plausible nutritional patterns (e.g. estimated iron running low), but it will never diagnose a deficiency or condition. Intake estimates aren't lab values, and unlogged days and untracked factors (sleep, stress, activity) are stated as real gaps. Persistent symptoms get pointed at a doctor, with the weekly report offered as something to bring along.
 
-## 2. Comparison: Generic AI vs. Clover Curated AI
-
-| Feature | Generic AI Planner (e.g., ChatGPT, Claude) | Clover Curated AI Food Planner |
-| :--- | :--- | :--- |
-| **Ingredient Sourcing** | Assumes supermarket availability; ignores origin. | Grounded in local farm stand inventory and seasonal calendars. |
-| **Seasonality** | Often ignores seasonal constraints (suggests berries in winter). | Dynamically adjusts based on the local USDA growing zone. |
-| **Friction Reduction** | Gives recipes but leaves sourcing entirely to the user. | Couples recipes with specific local pickup locations and windows. |
-| **Sustainability** | High food-mile footprint; high household waste. | Low-mileage sourcing; zero-waste cross-utilization of ingredients. |
+### F. Tone is engineered, not improvised
+The weekly report and mood insight cards are generated from a fixed, reviewed template library selected by computed patterns — not open-ended generation. This is deliberate: it guarantees the "supportive friend" voice can't drift into a lab-report or scolding tone as usage scales.
 
 ---
 
-## 3. What It Takes to Build It
+## 2. What "curated" means here
 
-To bring this highly curated planner to life as a simple, high-utility web application, we will build:
+Clover doesn't curate *ingredients* or *sourcing* — it curates the **experience of tracking**:
 
-1.  **A Seasonal Crop Engine**: A deterministic database mapping regional USDA Zone 5b (Concord, NH) crops to specific calendar months.
-2.  **A Local Farm Registry**: A structured directory of local farm stands, orchard stores, and community hubs with their active pickup windows.
-3.  **An Interactive Planner UI**: A beautiful, mobile-friendly interface where users select their dietary preferences, household size, and desired local ingredients, instantly generating a curated 3-day or 7-day meal plan.
-4.  **Actionable Shopping Lists**: A consolidated grocery list categorized by the exact farm stand where the items can be purchased.
+| Generic food-logging app | Clover |
+| :--- | :--- |
+| Manual entry, per-ingredient, per-meal | One sentence or photo logs a full meal — or several |
+| Calorie/macro targets shown as pass/fail | Trends shown as direction, only over logged days |
+| Chatbot bolted on as a separate feature | One chat that logs *and* answers questions |
+| Generic "eat more protein" advice | Advice grounded in your actual estimated intake, with stated data limits |
+| Missed days shown as broken streaks | Missed days are simply absent from the picture |
 
 ---
 
-## 4. How You (The Creator) Are Involved
+## 3. Open surface for the next iteration
 
-As the visionary, your involvement is crucial to guiding the curation rules and local flavor:
-
-*   **Step 1: Curation Guidelines**: You will help define what makes a meal "local." Do we allow pantry staples (like olive oil, salt, and flour) to be sourced from supermarkets, while keeping all fresh produce, meats, and dairy strictly local? (Our prototype defaults to this practical approach).
-*   **Step 2: Farm Partnerships**: You will identify the local farm stands in your area (we are starting with Concord launch partners like Maple Hill Farm and Clover Ridge Orchards) to seed the initial registry.
-*   **Step 3: User Feedback Loop**: As you use the planner, you will tell us if the meal suggestions feel too complicated, too simple, or if they match your household's cooking style. We will refine the AI's recipe logic based on your taste.
+- **Timezone-aware day boundaries** — currently UTC by default; per-user IANA timezones are schema-ready but not yet populated by onboarding.
+- **Weekly export mood section** — mood/feeling data isn't in the shareable PDF yet by design (kept private-only until validated with real usage).
+- **Wearables / sleep tracking** — explicitly named as a current gap in every AI response that touches on energy or fatigue, rather than silently ignored.
