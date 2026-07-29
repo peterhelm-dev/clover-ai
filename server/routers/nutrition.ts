@@ -3,7 +3,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { getOrCreateSubscription, incrementAICallsUsed } from "../db-subscriptions";
-import { getAICallLimit } from "../products";
+import { getAICallLimit, GUEST_AI_LIMIT, GUEST_LIMIT_MESSAGE } from "../products";
 import { buildLogContext, SYMPTOM_GUARDRAILS } from "../log-context";
 import { MICRONUTRIENT_KEYS } from "../nutrients";
 
@@ -234,10 +234,17 @@ export const nutritionRouter = router({
       // Auto-create free subscription if it doesn't exist
       const sub = await getOrCreateSubscription(ctx.user.id);
 
+      // Guests get a hard cap that overrides tier, trial, and tester status —
+      // the demo is 10 analyses, then a free account.
+      const isGuest = ctx.user.loginMethod === "anonymous";
+      if (isGuest && sub.aiCallsUsedThisMonth >= GUEST_AI_LIMIT) {
+        throw new TRPCError({ code: "FORBIDDEN", message: GUEST_LIMIT_MESSAGE });
+      }
+
       // Testers get unlimited AI calls regardless of tier
-      const isTester = !!(ctx.user.isTester);
+      const isTester = !isGuest && !!(ctx.user.isTester);
       const limit = getAICallLimit(sub.tier);
-      if (!isTester && sub.aiCallsUsedThisMonth >= limit) {
+      if (!isGuest && !isTester && sub.aiCallsUsedThisMonth >= limit) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: `You have reached your AI call limit for this month (${limit} calls). Upgrade to Clover Plus for unlimited logs.`,

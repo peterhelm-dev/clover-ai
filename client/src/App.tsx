@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import LandingPage from "./pages/LandingPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import BetaInvitePage from "./pages/BetaInvitePage";
+import PassRedeemPage from "./pages/PassRedeemPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import FeaturesPage from "./pages/FeaturesPage";
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/" component={RootRoute} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/beta/:code" component={BetaInvitePage} />
+      <Route path="/pass/:code" component={PassRedeemPage} />
       <Route path="/privacy" component={PrivacyPolicy} />
       <Route path="/tos" component={TermsOfService} />
       <Route path="/features" component={FeaturesPage} />

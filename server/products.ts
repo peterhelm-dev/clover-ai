@@ -13,7 +13,7 @@ export const PRODUCTS = {
   },
   PRO: {
     name: "Clover Pro",
-    description: "Everything in Plus, plus travel sourcing, weekly email digest, priority AI response, export to CSV",
+    description: "Everything in Plus, plus full vitamin & mineral tracking, mood-and-meal insights, priority AI analysis, export to CSV",
     monthlyPrice: 1499, // $14.99 in cents
     yearlyPrice: 9900, // $99/year in cents
     aiCallsPerMonth: Infinity,
@@ -35,6 +35,16 @@ export const TIER_LIMITS = {
   plus: Infinity,
   pro: Infinity,
 } as const;
+
+/**
+ * Anonymous guest demo: a hard cap that overrides everything else (including
+ * the auto-started Plus trial new accounts get). Guests exist so someone can
+ * see the product work in 60 seconds — 10 analyses, then a free account.
+ */
+export const GUEST_AI_LIMIT = 10;
+
+export const GUEST_LIMIT_MESSAGE =
+  "That's all 10 free guest analyses — hope it showed you what Clover can do. Create a free account to keep tracking.";
 
 /**
  * Helper to get product details by tier

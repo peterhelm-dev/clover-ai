@@ -4,6 +4,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import {
   Mic,
   BarChart3,
@@ -23,6 +26,34 @@ import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { AnimatedFeatureCard } from "@/components/AnimatedFeatureCard";
 import { AnimatedPricingCard } from "@/components/AnimatedPricingCard";
 import { TestimonialCard } from "@/components/TestimonialCard";
+
+/**
+ * Guest demo: anonymous Supabase session, no signup — straight into the
+ * logger with 10 free AI analyses. Show, don't tell.
+ */
+function GuestDemoButton() {
+  const [busy, setBusy] = useState(false);
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        const { error } = await supabase.auth.signInAnonymously();
+        if (error) {
+          setBusy(false);
+          toast.error("The guest demo is taking a breather — try 'Get early access' instead.");
+          return;
+        }
+        window.location.href = "/";
+      }}
+      className="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold flex items-center justify-center gap-2 group disabled:opacity-70"
+    >
+      {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+      Try it right now — no signup
+    </button>
+  );
+}
 
 // Asset URLs for generated images
 const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663588202014/hU9uCPSS7HGW4CDwXkxoga/hero-background-NnGEqfKJ4rFnfvwpoqp2Ck.webp";
@@ -127,10 +158,10 @@ const PLANS = [
     badge: null,
     features: [
       "Everything in Plus",
-      "AI health chat",
-      "Custom macro targets",
-      "Export data",
-      "API access",
+      "Full vitamin & mineral tracking",
+      "Mood-and-meal pattern insights",
+      "AI health chat over your data",
+      "Shareable weekly report (PDF)",
     ],
     cta: "Start free trial",
     ctaVariant: "outline" as const,
@@ -209,23 +240,18 @@ function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <GuestDemoButton />
             <a
               href={getLoginUrl()}
-              className="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold flex items-center justify-center gap-2 group"
+              className="px-8 py-4 border-2 border-green-200 text-green-700 rounded-lg hover:bg-green-50 transition font-semibold flex items-center justify-center gap-2 group"
             >
               Get early access
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
             </a>
-            <a
-              href="#features"
-              className="px-8 py-4 border-2 border-green-200 text-green-700 rounded-lg hover:bg-green-50 transition font-semibold"
-            >
-              Learn more
-            </a>
           </div>
 
           <p className="text-sm text-gray-500">
-            No credit card required • 10 free AI logs per month • Cancel anytime
+            No signup for the demo • No credit card ever • 10 free AI logs per month on the free plan
           </p>
         </div>
       </div>

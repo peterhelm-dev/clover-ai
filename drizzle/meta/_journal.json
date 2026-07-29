@@ -50,6 +50,13 @@
       "when": 1784123816778,
       "tag": "0006_mood-entries",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785186187743,
+      "tag": "0007_access-passes",
+      "breakpoints": true
     }
   ]
 }

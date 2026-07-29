@@ -1,9 +1,10 @@
 import { ForbiddenError } from "@shared/_core/errors";
 import { eq } from "drizzle-orm";
 import type { Request } from "express";
-import { appSettings, betaInvites, type User } from "../../drizzle/schema";
+import { appSettings, betaInvites, users, type User } from "../../drizzle/schema";
 import * as db from "../db";
 import { getDb } from "../db";
+import { ENV } from "./env";
 import { getSupabaseAuthClient } from "./supabaseAdmin";
 
 function getBearerToken(req: Request): string | null {
@@ -20,8 +21,27 @@ function getInviteCodeHeader(req: Request): string | undefined {
 
 function deriveLoginMethod(user: {
   app_metadata?: { provider?: string | null } | null;
+  is_anonymous?: boolean;
 }): string | null {
+  if (user.is_anonymous) return "anonymous";
   return user.app_metadata?.provider ?? null;
+}
+
+/**
+ * The owner's email always carries admin + unlimited AI, regardless of which
+ * provider they signed in with (GitHub today, Google tomorrow). Runs on every
+ * request but only writes when the row is missing the privileges.
+ */
+async function ensureOwnerPrivileges(user: User): Promise<User> {
+  if (!ENV.ownerEmail || user.email !== ENV.ownerEmail) return user;
+  if (user.isTester === 1 && user.role === "admin") return user;
+  const dbConn = await getDb();
+  if (!dbConn) return user;
+  await dbConn
+    .update(users)
+    .set({ isTester: 1, role: "admin" })
+    .where(eq(users.id, user.id));
+  return { ...user, isTester: 1, role: "admin" };
 }
 
 /**
@@ -45,10 +65,13 @@ export async function authenticateRequest(req: Request): Promise<User | null> {
 
   if (!user) {
     // New user — check invite-only mode before creating the local row.
+    // Anonymous guests bypass the invite gate by design: they're the public
+    // demo path and are hard-capped at GUEST_AI_LIMIT analyses.
     const dbConn = await getDb();
     const inviteCode = getInviteCodeHeader(req);
+    const isGuest = !!supabaseUser.is_anonymous;
 
-    if (dbConn) {
+    if (dbConn && !isGuest) {
       const [settings] = await dbConn.select().from(appSettings).limit(1);
       if (settings?.inviteOnly === 1) {
         if (!inviteCode) {
@@ -67,7 +90,7 @@ export async function authenticateRequest(req: Request): Promise<User | null> {
     const name =
       (supabaseUser.user_metadata?.full_name as string | undefined) ??
       (supabaseUser.user_metadata?.name as string | undefined) ??
-      null;
+      (isGuest ? "Guest" : null);
 
     await db.upsertUser({
       openId,
@@ -92,5 +115,5 @@ export async function authenticateRequest(req: Request): Promise<User | null> {
 
   if (!user) throw ForbiddenError("Failed to sync user info");
 
-  return user;
+  return ensureOwnerPrivileges(user);
 }

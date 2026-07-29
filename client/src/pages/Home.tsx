@@ -1266,8 +1266,18 @@ export default function Home() {
   // ---- allergen list from profile ----
   const knownAllergies: string[] = profile?.allergies ?? [];
 
+  // ---- guest demo mode ----
+  // Anonymous Supabase session: no onboarding, straight into the logger,
+  // hard-capped at 10 AI analyses server-side.
+  const isGuest = user?.loginMethod === "anonymous";
+  const [guestLimitHit, setGuestLimitHit] = useState(false);
+  useEffect(() => {
+    if (isGuest) setActiveTab("voice-logger");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGuest]);
+
   // ---- onboarding check ----
-  const needsOnboarding = isAuthenticated && !authLoading && !profileQuery.isLoading && !profile?.onboardingComplete;
+  const needsOnboarding = isAuthenticated && !authLoading && !profileQuery.isLoading && !profile?.onboardingComplete && !isGuest;
 
   // Top of the onboarding funnel — fires once per wizard entry.
   useEffect(() => {
@@ -1583,7 +1593,11 @@ export default function Home() {
     } catch (err: any) {
       if (analysisGenRef.current !== gen) return; // cancelled — stay quiet
       const msg = err?.message ?? "";
-      if (msg.includes("AI call limit") || msg.includes("Upgrade")) {
+      if (msg.includes("guest analyses")) {
+        setGuestLimitHit(true);
+        trackEvent("log_attempt_failed", { method, reason: "guest_limit" });
+        addChatMsg({ role: "ai", text: msg });
+      } else if (msg.includes("AI call limit") || msg.includes("Upgrade")) {
         setShowUpgradeModal(true);
         trackEvent("log_attempt_failed", { method, reason: "ai_call_limit" });
         addChatMsg({ role: "ai", text: "You've reached your free tier limit (10 AI logs/month). Upgrade to Clover Plus for unlimited logging! 🌿" });
@@ -1737,7 +1751,11 @@ export default function Home() {
       } catch (err: any) {
         if (analysisGenRef.current !== gen) return; // cancelled — stay quiet
         const msg = err?.message ?? "";
-        if (msg.includes("AI call limit") || msg.includes("Upgrade")) {
+        if (msg.includes("guest analyses")) {
+          setGuestLimitHit(true);
+          trackEvent("log_attempt_failed", { method: "photo", reason: "guest_limit" });
+          addChatMsg({ role: "ai", text: msg });
+        } else if (msg.includes("AI call limit") || msg.includes("Upgrade")) {
           setShowUpgradeModal(true);
           trackEvent("log_attempt_failed", { method: "photo", reason: "ai_call_limit" });
           addChatMsg({ role: "ai", text: "You've reached your free tier limit. Upgrade to Clover Plus for unlimited logging! 🌿" });
@@ -1865,7 +1883,7 @@ export default function Home() {
             Sign in with GitHub
           </Button>
           <p className="text-center text-xs text-muted-foreground">
-            By continuing, you agree to Clover's curated wellness terms.
+            By continuing, you agree to Clover's Terms of Service and Privacy Policy.
           </p>
         </div>
       </div>
@@ -2202,8 +2220,23 @@ export default function Home() {
         </div>
 
         <div className="p-6 border-t border-border/40 space-y-3">
-          {/* Subscription badge */}
-          {subscriptionQuery.data && (
+          {/* Subscription / guest badge */}
+          {isGuest ? (
+            <div className="space-y-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-2.5">
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="font-semibold text-primary">Guest demo</span>
+                <span className="text-muted-foreground">
+                  {Math.min(subscriptionQuery.data?.aiCallsUsed ?? 0, 10)} / 10 free analyses
+                </span>
+              </div>
+              <a
+                href={getLoginUrl()}
+                className="block text-center text-[11px] font-medium rounded-md bg-primary text-primary-foreground py-1.5 hover:opacity-90 transition-opacity"
+              >
+                Create a free account
+              </a>
+            </div>
+          ) : subscriptionQuery.data ? (
             <div className="flex items-center justify-between text-[10px] text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">
               <span className="flex items-center gap-1.5">
                 <Crown className="h-3 w-3 text-amber-500" />
@@ -2211,7 +2244,7 @@ export default function Home() {
               </span>
               <span>{subscriptionQuery.data.aiCallsUsed} / {subscriptionQuery.data.aiCallsLimit === Infinity ? "∞" : subscriptionQuery.data.aiCallsLimit} AI calls</span>
             </div>
-          )}
+          ) : null}
           <Button
             variant="ghost"
             size="sm"
@@ -2829,6 +2862,20 @@ export default function Home() {
                 >
                   <SkipForward className="h-3.5 w-3.5" /> Log it anyway — best estimates
                 </Button>
+              </div>
+            )}
+
+            {/* Guest demo limit reached — the one hard sell in the app */}
+            {guestLimitHit && (
+              <div className="mb-2 p-4 rounded-xl border border-primary/30 bg-primary/5 text-center space-y-2">
+                <p className="text-sm font-medium">That's the guest demo — 10 AI analyses, all real.</p>
+                <p className="text-xs text-muted-foreground">A free account gets you 10 AI logs a month, weekly reports, and nutrient tracking — no credit card.</p>
+                <a
+                  href={getLoginUrl()}
+                  className="inline-block text-xs font-medium rounded-lg bg-primary text-primary-foreground px-4 py-2 hover:opacity-90 transition-opacity"
+                >
+                  Create a free account
+                </a>
               </div>
             )}
 

@@ -10,6 +10,7 @@ import {
   serial,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -377,3 +378,38 @@ export const moodEntries = pgTable(
 
 export type MoodEntry = typeof moodEntries.$inferSelect;
 export type InsertMoodEntry = typeof moodEntries.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Access Passes — owner-shareable links granting free unlimited AI access,
+// revocable at any time. Redeeming sets isTester=1; deactivating a pass
+// clears it for that pass's redeemers (unless covered by another active pass).
+// ---------------------------------------------------------------------------
+export const accessPasses = pgTable("accessPasses", {
+  id: serial("id").primaryKey(),
+  /** Token used in the share link: /pass/:code */
+  code: varchar("code", { length: 32 }).notNull().unique(),
+  /** Label for the admin's own bookkeeping, e.g. "For Alice". */
+  label: varchar("label", { length: 255 }),
+  createdBy: integer("createdBy").notNull(),
+  /** 1 = redeemable and privileges live; 0 = revoked. */
+  active: integer("active").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AccessPass = typeof accessPasses.$inferSelect;
+
+export const accessPassRedemptions = pgTable(
+  "accessPassRedemptions",
+  {
+    id: serial("id").primaryKey(),
+    passId: integer("passId").notNull(),
+    userId: integer("userId").notNull(),
+    redeemedAt: timestamp("redeemedAt").defaultNow().notNull(),
+  },
+  table => [
+    uniqueIndex("access_pass_redemptions_pass_user_idx").on(table.passId, table.userId),
+    index("access_pass_redemptions_user_idx").on(table.userId),
+  ]
+);
+
+export type AccessPassRedemption = typeof accessPassRedemptions.$inferSelect;

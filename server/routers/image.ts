@@ -1,9 +1,12 @@
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import { storagePut } from "../storage";
 import { invokeLLM } from "../_core/llm";
 import { getDb } from "../db";
 import { foodLogs } from "../../drizzle/schema";
+import { getOrCreateSubscription, incrementAICallsUsed } from "../db-subscriptions";
+import { GUEST_AI_LIMIT, GUEST_LIMIT_MESSAGE } from "../products";
 
 /**
  * Image-based meal logging router.
@@ -45,7 +48,16 @@ export const imageRouter = router({
         imageUrl: z.string().url(),
       })
     )
-    .mutation(async ({ input }: any) => {
+    .mutation(async ({ input, ctx }: any) => {
+      // Guests share the same hard demo cap as the chat — photo analysis is
+      // an AI call too, so it can't be a loophole around the 10-try limit.
+      if (ctx.user.loginMethod === "anonymous") {
+        const sub = await getOrCreateSubscription(ctx.user.id);
+        if (sub.aiCallsUsedThisMonth >= GUEST_AI_LIMIT) {
+          throw new TRPCError({ code: "FORBIDDEN", message: GUEST_LIMIT_MESSAGE });
+        }
+        await incrementAICallsUsed(ctx.user.id, 1);
+      }
       const response = await invokeLLM({
         messages: [
           {

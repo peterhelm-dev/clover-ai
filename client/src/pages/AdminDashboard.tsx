@@ -39,7 +39,7 @@ import {
   MessageSquarePlus,
 } from "lucide-react";
 
-type Tab = "overview" | "users" | "waitlist" | "referrals" | "beta_invites" | "beta_feedback";
+type Tab = "overview" | "users" | "waitlist" | "referrals" | "beta_invites" | "beta_feedback" | "access_passes";
 
 export default function AdminDashboard() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex gap-1 -mb-px">
-            {(["overview", "users", "waitlist", "referrals", "beta_invites", "beta_feedback"] as Tab[]).map((tab) => (
+            {(["overview", "users", "waitlist", "referrals", "beta_invites", "beta_feedback", "access_passes"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -101,6 +101,7 @@ export default function AdminDashboard() {
         {activeTab === "referrals" && <ReferralsTab />}
         {activeTab === "beta_invites" && <BetaInvitesTab />}
         {activeTab === "beta_feedback" && <BetaFeedbackTab />}
+        {activeTab === "access_passes" && <AccessPassesTab />}
       </main>
     </div>
   );
@@ -723,6 +724,100 @@ function BetaFeedbackTab() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Access Passes tab — shareable free-unlimited-access links, revocable anytime
+// ---------------------------------------------------------------------------
+function AccessPassesTab() {
+  const { data: passes, isLoading, refetch } = trpc.passes.adminList.useQuery();
+  const [label, setLabel] = useState("");
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  const createPass = trpc.passes.adminCreate.useMutation({
+    onSuccess: () => {
+      toast.success("Pass created — copy the link and send it.");
+      setLabel("");
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const setActive = trpc.passes.adminSetActive.useMutation({
+    onSuccess: (_d, vars) => {
+      toast.success(vars.active ? "Pass re-activated" : "Pass revoked — redeemers lose unlimited access");
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const copyLink = (code: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/pass/${code}`);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xl font-semibold text-gray-900">Access Passes ({passes?.length ?? "…"})</h2>
+      </div>
+      <p className="text-sm text-gray-500 mb-6">
+        Each pass is a link that grants free unlimited AI access to whoever signs in and claims it.
+        Turn a pass off at any time — its redeemers drop back to the normal free tier instantly.
+      </p>
+
+      <div className="flex gap-2 mb-6 max-w-md">
+        <input
+          type="text"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder='Label (e.g. "For Alice — recruiting")'
+          className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+          onKeyDown={(e) => { if (e.key === "Enter") createPass.mutate({ label: label || undefined }); }}
+        />
+        <Button size="sm" disabled={createPass.isPending} onClick={() => createPass.mutate({ label: label || undefined })}>
+          {createPass.isPending ? "Creating..." : "Create pass"}
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <p className="text-sm text-gray-500">Loading...</p>
+      ) : (passes ?? []).length === 0 ? (
+        <p className="text-sm text-gray-500">No passes yet — create one above.</p>
+      ) : (
+        <div className="space-y-2">
+          {(passes ?? []).map((p) => (
+            <Card key={p.id} className={p.active ? "" : "opacity-60"}>
+              <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-sm font-semibold">{p.code}</span>
+                    <Badge variant={p.active ? "default" : "secondary"}>{p.active ? "active" : "revoked"}</Badge>
+                    <span className="text-xs text-gray-500">{p.redemptions} redeemed</span>
+                  </div>
+                  {p.label && <p className="text-xs text-gray-500 mt-0.5 truncate">{p.label}</p>}
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <Button size="sm" variant="outline" onClick={() => copyLink(p.code)}>
+                    <Copy className="w-3.5 h-3.5 mr-1.5" />
+                    {copiedCode === p.code ? "Copied!" : "Copy link"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={p.active ? "destructive" : "default"}
+                    disabled={setActive.isPending}
+                    onClick={() => setActive.mutate({ id: p.id, active: !p.active })}
+                  >
+                    {p.active ? "Turn off" : "Turn on"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
