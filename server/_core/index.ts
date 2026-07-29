@@ -65,6 +65,22 @@ async function startServer() {
   app.set("trust proxy", 1);
   const server = createServer(app);
 
+  // Legacy domains: 301-redirect any visitor arriving via an old hostname
+  // straight to the canonical one, preserving path/query. Needed because
+  // clover-farm-production.up.railway.app was already shared (e.g. on a
+  // resume) before the app moved to clover-ai.up.railway.app — this must
+  // run before literally anything else so it also covers Stripe webhooks,
+  // the API, and static assets, not just page loads.
+  const LEGACY_HOSTS = ["clover-farm-production.up.railway.app"];
+  const CANONICAL_HOST = "clover-ai.up.railway.app";
+  app.use((req, res, next) => {
+    if (LEGACY_HOSTS.includes(req.hostname)) {
+      res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
+      return;
+    }
+    next();
+  });
+
   // Register Stripe webhook BEFORE express.json() middleware
   registerStripeWebhook(app);
 
