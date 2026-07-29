@@ -2219,7 +2219,10 @@ export default function Home() {
           )}
         </div>
 
-        <div className="p-6 border-t border-border/40 space-y-3">
+        <div className="p-6 pb-24 border-t border-border/40 space-y-3">
+          {/* Extra bottom padding clears the fixed Feedback button (bottom-6
+              left-6), which otherwise sits directly on top of this section
+              and visually hides the Log Out button beneath it. */}
           {/* Subscription / guest badge */}
           {isGuest ? (
             <div className="space-y-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-2.5">
