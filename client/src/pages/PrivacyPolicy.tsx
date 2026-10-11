@@ -70,8 +70,8 @@ export default function PrivacyPolicy() {
               We do not sell, trade, or rent your personal information to third parties. We may share information with:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-gray-600">
-              <li><strong>Service providers:</strong> third-party vendors who assist in operating the Service (e.g., Stripe for payments, Edamam for recipe data), subject to confidentiality agreements.</li>
-              <li><strong>AI providers:</strong> anonymized food descriptions may be sent to AI inference services to generate nutritional analysis. No personally identifiable information is included.</li>
+              <li><strong>Service providers:</strong> third-party vendors who assist in operating the Service (e.g., Supabase for database, sign-in and photo storage, Railway for hosting, Stripe for payments, Edamam for recipe data), subject to confidentiality agreements.</li>
+              <li><strong>AI providers:</strong> to analyze meals and answer your questions, we send the AI provider (Anthropic) what you type or say in the chat, meal photos you upload, and relevant context from your account such as recent food logs, nutrient estimates, mood check-ins and your health profile (age, weight, dietary choices, allergies and health conditions, if you entered them). Your name and email address are not included. The provider does not use this data to train its models.</li>
               <li><strong>Legal requirements:</strong> we may disclose information if required by law or in response to valid legal process.</li>
             </ul>
           </section>
