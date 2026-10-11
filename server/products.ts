@@ -1,5 +1,5 @@
 /**
- * Stripe product and pricing definitions for Clover Wellness
+ * Stripe product and pricing definitions for Clover
  * These are used to create checkout sessions and manage subscriptions
  */
 

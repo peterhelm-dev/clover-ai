@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-600 text-white">
               <Leaf className="h-4 w-4" />
             </div>
-            Clover Wellness
+            Clover
           </Link>
           <Link href="/" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
             <ArrowLeft className="h-4 w-4" />
@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
           <section className="mb-10">
             <h2 className="text-xl font-semibold text-gray-800 mb-3">1. Introduction</h2>
             <p className="text-gray-600 leading-relaxed">
-              Welcome to Clover Wellness ("we," "us," or "our"). We are committed to protecting your personal
+              Welcome to Clover ("we," "us," or "our"). We are committed to protecting your personal
               information and your right to privacy. This Privacy Policy explains how we collect, use, disclose,
               and safeguard your information when you use our application and services (collectively, the "Service").
             </p>
@@ -70,8 +70,8 @@ export default function PrivacyPolicy() {
               We do not sell, trade, or rent your personal information to third parties. We may share information with:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-gray-600">
-              <li><strong>Service providers:</strong> third-party vendors who assist in operating the Service (e.g., Stripe for payments, Edamam for recipe data), subject to confidentiality agreements.</li>
-              <li><strong>AI providers:</strong> anonymized food descriptions may be sent to AI inference services to generate nutritional analysis. No personally identifiable information is included.</li>
+              <li><strong>Service providers:</strong> third-party vendors who assist in operating the Service (e.g., Supabase for database, sign-in and photo storage, Railway for hosting, Stripe for payments, Edamam for recipe data), subject to confidentiality agreements.</li>
+              <li><strong>AI providers:</strong> to analyze meals and answer your questions, we send the AI provider (Anthropic) what you type or say in the chat, meal photos you upload, and relevant context from your account such as recent food logs, nutrient estimates, mood check-ins and your health profile (age, weight, dietary choices, allergies and health conditions, if you entered them). Your name and email address are not included. The provider does not use this data to train its models.</li>
               <li><strong>Legal requirements:</strong> we may disclose information if required by law or in response to valid legal process.</li>
             </ul>
           </section>
@@ -80,8 +80,9 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-semibold text-gray-800 mb-3">5. Data Retention</h2>
             <p className="text-gray-600 leading-relaxed">
               We retain your personal data for as long as your account is active or as needed to provide the Service.
-              You may request deletion of your account and associated data at any time by contacting us. We will
-              respond to deletion requests within 30 days.
+              You can delete your account and associated data at any time from Settings → Delete account in the app.
+              This immediately and permanently removes your profile, meal logs, photos and mood check-ins, and cancels
+              any paid subscription. You may also request deletion by contacting us, and we will respond within 30 days.
             </p>
           </section>
 
@@ -133,7 +134,7 @@ export default function PrivacyPolicy() {
               If you have questions or concerns about this Privacy Policy or our data practices, please contact us at:
             </p>
             <div className="mt-3 p-4 bg-gray-50 rounded-lg text-gray-600 text-sm">
-              <p className="font-medium">Clover Wellness</p>
+              <p className="font-medium">Clover</p>
               <p className="mt-1">Email: privacy@cloverwellness.app</p>
             </div>
           </section>
@@ -143,7 +144,7 @@ export default function PrivacyPolicy() {
       {/* Footer */}
       <footer className="border-t border-gray-100 py-8">
         <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <span>© {new Date().getFullYear()} Clover Wellness. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Clover. All rights reserved.</span>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-gray-600 transition-colors font-medium text-gray-600">Privacy Policy</Link>
             <Link href="/tos" className="hover:text-gray-600 transition-colors">Terms of Service</Link>

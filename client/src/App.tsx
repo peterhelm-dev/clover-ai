@@ -12,7 +12,6 @@ import PassRedeemPage from "./pages/PassRedeemPage";
 import LoginPage from "./pages/LoginPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
-import FeaturesPage from "./pages/FeaturesPage";
 import FeedbackButton from "./components/FeedbackButton";
 import { useAuth } from "./_core/hooks/useAuth";
 
@@ -52,7 +51,8 @@ function Router() {
       <Route path="/pass/:code" component={PassRedeemPage} />
       <Route path="/privacy" component={PrivacyPolicy} />
       <Route path="/tos" component={TermsOfService} />
-      <Route path="/features" component={FeaturesPage} />
+      {/* Old features page retired; send old links to the landing page's "How it works" section. */}
+      <Route path="/features">{() => { window.location.replace("/#how"); return null; }}</Route>
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

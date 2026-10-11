@@ -11,7 +11,7 @@ export default function TermsOfService() {
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-600 text-white">
               <Leaf className="h-4 w-4" />
             </div>
-            Clover Wellness
+            Clover
           </Link>
           <Link href="/" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
             <ArrowLeft className="h-4 w-4" />
@@ -29,7 +29,7 @@ export default function TermsOfService() {
           <section className="mb-10">
             <h2 className="text-xl font-semibold text-gray-800 mb-3">1. Acceptance of Terms</h2>
             <p className="text-gray-600 leading-relaxed">
-              By accessing or using Clover Wellness ("Service"), you agree to be bound by these Terms of Service
+              By accessing or using Clover ("Service"), you agree to be bound by these Terms of Service
               ("Terms"). If you do not agree to these Terms, do not use the Service. These Terms apply to all
               visitors, users, and others who access or use the Service.
             </p>
@@ -38,7 +38,7 @@ export default function TermsOfService() {
           <section className="mb-10">
             <h2 className="text-xl font-semibold text-gray-800 mb-3">2. Description of Service</h2>
             <p className="text-gray-600 leading-relaxed">
-              Clover Wellness is an AI-powered nutrition tracking application that allows users to log food intake
+              Clover is an AI-powered nutrition tracking application that allows users to log food intake
               via voice or text, receive AI-generated nutritional analysis, view dietary insights, and access curated
               recipes. The Service is provided for informational and personal wellness purposes only.
             </p>
@@ -68,7 +68,7 @@ export default function TermsOfService() {
           <section className="mb-10">
             <h2 className="text-xl font-semibold text-gray-800 mb-3">4. Subscriptions and Billing</h2>
             <p className="text-gray-600 leading-relaxed mb-3">
-              Clover Wellness offers free and paid subscription tiers. By subscribing to a paid plan, you agree to:
+              Clover offers free and paid subscription tiers. By subscribing to a paid plan, you agree to:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-gray-600">
               <li>Pay all fees associated with your chosen subscription plan.</li>
@@ -103,7 +103,7 @@ export default function TermsOfService() {
             <h2 className="text-xl font-semibold text-gray-800 mb-3">6. Intellectual Property</h2>
             <p className="text-gray-600 leading-relaxed">
               The Service and its original content, features, and functionality are and will remain the exclusive
-              property of Clover Wellness and its licensors. Our trademarks and trade dress may not be used in
+              property of Clover and its licensors. Our trademarks and trade dress may not be used in
               connection with any product or service without our prior written consent.
             </p>
             <p className="text-gray-600 leading-relaxed mt-3">
@@ -130,7 +130,7 @@ export default function TermsOfService() {
           <section className="mb-10">
             <h2 className="text-xl font-semibold text-gray-800 mb-3">8. Limitation of Liability</h2>
             <p className="text-gray-600 leading-relaxed">
-              To the maximum extent permitted by applicable law, Clover Wellness shall not be liable for any indirect,
+              To the maximum extent permitted by applicable law, Clover shall not be liable for any indirect,
               incidental, special, consequential, or punitive damages, including but not limited to loss of profits,
               data, or goodwill, arising out of or in connection with your use of the Service, even if we have been
               advised of the possibility of such damages.
@@ -165,7 +165,7 @@ export default function TermsOfService() {
               If you have questions about these Terms, please contact us at:
             </p>
             <div className="mt-3 p-4 bg-gray-50 rounded-lg text-gray-600 text-sm">
-              <p className="font-medium">Clover Wellness</p>
+              <p className="font-medium">Clover</p>
               <p className="mt-1">Email: legal@cloverwellness.app</p>
             </div>
           </section>
@@ -175,7 +175,7 @@ export default function TermsOfService() {
       {/* Footer */}
       <footer className="border-t border-gray-100 py-8">
         <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <span>© {new Date().getFullYear()} Clover Wellness. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Clover. All rights reserved.</span>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacy Policy</Link>
             <Link href="/tos" className="hover:text-gray-600 transition-colors font-medium text-gray-600">Terms of Service</Link>
