@@ -1,4 +1,4 @@
-# Clover AI
+# Clover
 
 **AI-powered nutrition tracking that works the way you talk.**
 

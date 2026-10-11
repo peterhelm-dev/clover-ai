@@ -1871,7 +1871,7 @@ export default function Home() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Leaf className="h-6 w-6" />
             </div>
-            <h2 className="text-3xl font-serif font-bold tracking-tight">Clover AI</h2>
+            <h2 className="text-3xl font-serif font-bold tracking-tight">Clover</h2>
             <p className="text-sm text-muted-foreground">
               Your session ended. Sign back in to keep tracking your nutrition.
             </p>
@@ -2141,7 +2141,7 @@ export default function Home() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Leaf className="h-5 w-5" />
             </div>
-            <span>Clover AI</span>
+            <span>Clover</span>
           </div>
 
           {/* User summary */}
@@ -2270,7 +2270,7 @@ export default function Home() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <Leaf className="h-4 w-4" />
             </div>
-            <span className="text-sm">Clover AI</span>
+            <span className="text-sm">Clover</span>
           </div>
           <div className="ml-auto text-xs text-muted-foreground capitalize font-medium">{activeTab.replace("-", " ")}</div>
         </header>
@@ -2622,7 +2622,7 @@ export default function Home() {
                     <CardTitle className="font-serif text-base font-bold flex items-center gap-2">
                       <Sparkles className="h-5 w-5 text-primary" /> AI Health Overview
                     </CardTitle>
-                    <CardDescription className="text-xs mt-0.5">A personalised daily summary and improvement tips from Clover AI.</CardDescription>
+                    <CardDescription className="text-xs mt-0.5">A personalised daily summary and improvement tips from Clover.</CardDescription>
                   </div>
                   <Button
                     size="sm"
@@ -2684,7 +2684,7 @@ export default function Home() {
             <button
               onClick={() => setShowAiChat(prev => !prev)}
               className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-150"
-              title="Ask Clover AI about your nutrition"
+              title="Ask Clover about your nutrition"
             >
               <BrainCircuit className="h-6 w-6" />
             </button>
@@ -2695,7 +2695,7 @@ export default function Home() {
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-muted/30">
                   <div className="flex items-center gap-2">
                     <BrainCircuit className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-semibold">Ask Clover AI</span>
+                    <span className="text-sm font-semibold">Ask Clover</span>
                   </div>
                   <button onClick={() => setShowAiChat(false)} className="text-muted-foreground hover:text-foreground text-lg leading-none">&times;</button>
                 </div>

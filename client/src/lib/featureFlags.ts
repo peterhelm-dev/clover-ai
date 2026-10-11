@@ -27,7 +27,7 @@ export const FEATURE_FLAGS = {
   curatedRecipes: true,
   mealPlanning: true,
   billing: true,
-  aiNutritionChat: true, // floating "Ask Clover AI" panel
+  aiNutritionChat: true, // floating "Ask Clover" panel
   waterTracking: true, // card on the dashboard
   referralProgram: true,
   betaFeedback: true, // beta ops — floating feedback button stays

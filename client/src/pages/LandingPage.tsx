@@ -131,7 +131,7 @@ function Logo({ dark = false }: { dark?: boolean }) {
     <a href="/" className="flex items-center gap-2">
       <img src="/clover-mark.png" alt="" className={`h-7 w-auto ${dark ? "brightness-0 invert" : ""}`} />
       <span className={`text-xl font-serif font-semibold ${dark ? "text-white" : "text-green-900"}`}>
-        Clover Wellness
+        Clover
       </span>
     </a>
   );
@@ -345,7 +345,7 @@ function Practitioners() {
         <div className="lg:order-2">
           <img
             src={PRACTITIONERS}
-            alt="Two people at a sunlit table looking over a one-page summary together"
+            alt="A practitioner and a client looking over a one-page weekly summary together"
             className="w-full rounded-3xl shadow-lg"
           />
         </div>
@@ -446,7 +446,7 @@ function Footer() {
             Clover provides AI-estimated nutrition information for general wellness. It is not a medical device and does
             not diagnose, treat or prevent any condition. Talk to a qualified professional about health concerns.
           </p>
-          <p className="text-sm">© {new Date().getFullYear()} Clover Wellness. All rights reserved.</p>
+          <p className="text-sm">© {new Date().getFullYear()} Clover. All rights reserved.</p>
         </div>
       </div>
     </footer>

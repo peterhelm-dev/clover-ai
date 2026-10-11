@@ -58,7 +58,7 @@ export default function BetaInvitePage() {
         <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center">
           <span className="text-white font-bold text-lg">C</span>
         </div>
-        <span className="text-2xl font-bold text-gray-900">Clover Wellness</span>
+        <span className="text-2xl font-bold text-gray-900">Clover</span>
       </div>
 
       {/* Redeemed success state */}
@@ -121,7 +121,7 @@ export default function BetaInvitePage() {
               <p className="text-emerald-100 text-sm mt-1">
                 {invite?.note
                   ? invite.note
-                  : "Join the Clover Wellness beta and get 30 days of unlimited Pro access — free."}
+                  : "Join the Clover beta and get 30 days of unlimited Pro access — free."}
               </p>
             </div>
 

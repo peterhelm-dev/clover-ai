@@ -1,4 +1,4 @@
-# Clover AI: Product Philosophy
+# Clover: Product Philosophy
 
 Most food-tracking apps are built around a spreadsheet mindset: log every gram, hit your targets, feel bad when you miss a day. That model burns people out. Clover is built on the opposite premise — **logging should take seconds, and the app should never make you feel judged for a missed day.**
 

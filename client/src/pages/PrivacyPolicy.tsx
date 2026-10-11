@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-600 text-white">
               <Leaf className="h-4 w-4" />
             </div>
-            Clover Wellness
+            Clover
           </Link>
           <Link href="/" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
             <ArrowLeft className="h-4 w-4" />
@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
           <section className="mb-10">
             <h2 className="text-xl font-semibold text-gray-800 mb-3">1. Introduction</h2>
             <p className="text-gray-600 leading-relaxed">
-              Welcome to Clover Wellness ("we," "us," or "our"). We are committed to protecting your personal
+              Welcome to Clover ("we," "us," or "our"). We are committed to protecting your personal
               information and your right to privacy. This Privacy Policy explains how we collect, use, disclose,
               and safeguard your information when you use our application and services (collectively, the "Service").
             </p>
@@ -134,7 +134,7 @@ export default function PrivacyPolicy() {
               If you have questions or concerns about this Privacy Policy or our data practices, please contact us at:
             </p>
             <div className="mt-3 p-4 bg-gray-50 rounded-lg text-gray-600 text-sm">
-              <p className="font-medium">Clover Wellness</p>
+              <p className="font-medium">Clover</p>
               <p className="mt-1">Email: privacy@cloverwellness.app</p>
             </div>
           </section>
@@ -144,7 +144,7 @@ export default function PrivacyPolicy() {
       {/* Footer */}
       <footer className="border-t border-gray-100 py-8">
         <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <span>© {new Date().getFullYear()} Clover Wellness. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Clover. All rights reserved.</span>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-gray-600 transition-colors font-medium text-gray-600">Privacy Policy</Link>
             <Link href="/tos" className="hover:text-gray-600 transition-colors">Terms of Service</Link>

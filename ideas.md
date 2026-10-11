@@ -1,4 +1,4 @@
-# Clover AI: Design Language
+# Clover: Design Language
 
 This replaces an earlier design-brainstorm doc that was written for a different product concept (a local-food marketplace) and no longer reflects what's built. This is a short reference to the design language actually implemented.
 
@@ -12,6 +12,6 @@ This replaces an earlier design-brainstorm doc that was written for a different 
 
 ## Why this replaced the old brainstorm
 
-The original three design concepts here ("Agrarian Editorial," "Neo-Brutalist Harvest," "Warm Tech Craft") were built around a farm/grower marketplace product with role-based dashboards, pickup-window indicators, and match-suggestion UI. None of that exists in Clover AI, which is a single-user AI nutrition and mood tracker. Some of the visual instincts carried over (warm palette, card layouts, soft shadows) — the marketplace-specific interaction patterns did not.
+The original three design concepts here ("Agrarian Editorial," "Neo-Brutalist Harvest," "Warm Tech Craft") were built around a farm/grower marketplace product with role-based dashboards, pickup-window indicators, and match-suggestion UI. None of that exists in Clover, which is a single-user AI nutrition and mood tracker. Some of the visual instincts carried over (warm palette, card layouts, soft shadows) — the marketplace-specific interaction patterns did not.
 
 If a future redesign is worth exploring, scope it against the actual product surfaces: the chat logger, the weekly compassionate report, the nutrient panel, and the mood trends view — not a three-sided network UI.
