@@ -25,12 +25,12 @@ import { AnimatedFeatureCard } from "@/components/AnimatedFeatureCard";
 import { AnimatedPricingCard } from "@/components/AnimatedPricingCard";
 import { TestimonialCard } from "@/components/TestimonialCard";
 
-// Asset URLs for generated images
-const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663588202014/hU9uCPSS7HGW4CDwXkxoga/hero-background-NnGEqfKJ4rFnfvwpoqp2Ck.webp";
-const VOICE_FEATURE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663588202014/hU9uCPSS7HGW4CDwXkxoga/voice-logging-feature-4UaLYJp6o4ZKrEfbUGt2jX.webp";
-const NUTRITION_FEATURE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663588202014/hU9uCPSS7HGW4CDwXkxoga/nutrition-tracking-feature-BzUgYmWeTmVQ8wdCEhrogX.webp";
-const CALENDAR_FEATURE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663588202014/hU9uCPSS7HGW4CDwXkxoga/calendar-feature-NCupS2NRGoTsYQtkzWBT3d.webp";
-const RECIPES_FEATURE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663588202014/hU9uCPSS7HGW4CDwXkxoga/recipes-feature-84nRaFWF2FNmFKjid58zEx.webp";
+// Self-hosted brand illustrations (client/public/images)
+const HERO_BG = "/images/hero.webp";
+const VOICE_FEATURE = "/images/feature-voice.webp";
+const NUTRITION_FEATURE = "/images/feature-nutrients.webp";
+const CALENDAR_FEATURE = "/images/feature-report.webp";
+const RECIPES_FEATURE = "/images/feature-meal.webp";
 
 // ---------------------------------------------------------------------------
 // Data
