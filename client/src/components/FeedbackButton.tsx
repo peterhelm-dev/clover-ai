@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,8 +30,20 @@ const CATEGORIES = [
 
 type Category = (typeof CATEGORIES)[number]["value"];
 
+const OPEN_FEEDBACK_EVENT = "clover:open-feedback";
+
+/** Opens the feedback dialog from anywhere (e.g. the mobile header icon). */
+export function openFeedback() {
+  window.dispatchEvent(new Event(OPEN_FEEDBACK_EVENT));
+}
+
 export default function FeedbackButton() {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener(OPEN_FEEDBACK_EVENT, handler);
+    return () => window.removeEventListener(OPEN_FEEDBACK_EVENT, handler);
+  }, []);
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [category, setCategory] = useState<Category>("general");
@@ -76,7 +88,7 @@ export default function FeedbackButton() {
       {/* Floating button */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-6 z-40 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
+        className="fixed bottom-6 left-6 z-40 hidden md:flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
         aria-label="Give feedback"
       >
         <MessageSquarePlus className="w-4 h-4" />

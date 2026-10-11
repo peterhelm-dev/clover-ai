@@ -119,7 +119,7 @@ export function MealPlanningTab() {
             if (!meal) return null;
 
             return (
-              <Card key={day.date} className="border-border/60">
+              <Card key={day.date} className="border-border/60 py-0 gap-0">
                 <CardHeader className="p-4 pb-3 border-b border-border/40">
                   <CardTitle className="text-base font-semibold">{day.label}</CardTitle>
                 </CardHeader>

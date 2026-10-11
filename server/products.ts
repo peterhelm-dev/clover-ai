@@ -34,6 +34,8 @@ export const TIER_LIMITS = {
   free: 10,
   plus: Infinity,
   pro: Infinity,
+  // Beta testers have their own daily + weekly caps (see beta-program.ts), not a monthly one.
+  beta: Infinity,
 } as const;
 
 /**
@@ -49,7 +51,7 @@ export const GUEST_LIMIT_MESSAGE =
 /**
  * Helper to get product details by tier
  */
-export function getProductByTier(tier: "free" | "plus" | "pro") {
+export function getProductByTier(tier: "free" | "plus" | "pro" | "beta") {
   switch (tier) {
     case "plus":
       return PRODUCTS.PLUS;
@@ -64,6 +66,6 @@ export function getProductByTier(tier: "free" | "plus" | "pro") {
 /**
  * Helper to get AI call limit by tier
  */
-export function getAICallLimit(tier: "free" | "plus" | "pro"): number {
+export function getAICallLimit(tier: "free" | "plus" | "pro" | "beta"): number {
   return TIER_LIMITS[tier];
 }

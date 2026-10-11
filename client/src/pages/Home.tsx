@@ -4,6 +4,9 @@ import { ImageMealLogger } from "@/components/ImageMealLogger";
 import { WaterIntakeCard } from "@/components/WaterIntakeCard";
 import { MealPlanningTab } from "@/components/MealPlanningTab";
 import { DeleteAccountCard } from "@/components/DeleteAccountCard";
+import { BetaStatusCard } from "@/components/BetaStatusCard";
+import { MobileTabBar, CloseMobileSidebarOnNavigate } from "@/components/MobileTabBar";
+import { openFeedback } from "@/components/FeedbackButton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { FEATURE_FLAGS } from "@/lib/featureFlags";
@@ -13,8 +16,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import {
-  Sparkles, Calendar, Check, Leaf, Clock,
+  Sparkles, Calendar, Check, Leaf, Clock, MessageSquare,
   Mic, MicOff, BrainCircuit, Heart, AlertTriangle, Apple, Compass,
   LogOut, Activity, BarChart3, Bell, RefreshCw, Smartphone, ChevronRight,
   ChevronLeft, Send, SkipForward, Loader2, Wheat, Trash2, Pencil, Crown, X, CreditCard,
@@ -220,24 +224,30 @@ function AxisSelector({
         <span className="text-xs font-medium">{label}</span>
         <span className="text-[10px] text-muted-foreground">{value == null ? "not set" : ""}</span>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] text-muted-foreground w-10">{lowLabel}</span>
-        <div className="flex gap-1.5 flex-1 justify-center">
-          {[1, 2, 3, 4, 5].map(v => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => onChange(value === v ? null : v)}
-              className={`h-6 w-6 rounded-full border transition-colors ${
+      <div className="flex justify-between" role="radiogroup" aria-label={label}>
+        {[1, 2, 3, 4, 5].map(v => (
+          <button
+            key={v}
+            type="button"
+            role="radio"
+            aria-checked={value === v}
+            aria-label={`${label} ${v} of 5`}
+            onClick={() => onChange(value === v ? null : v)}
+            className="group h-11 flex-1 flex items-center justify-center"
+          >
+            <span
+              className={`h-7 w-7 rounded-full border transition-colors ${
                 value != null && v <= value
                   ? "bg-primary/70 border-primary"
-                  : "bg-muted/40 border-border/60 hover:border-border"
+                  : "bg-muted/40 border-border/60 group-hover:border-border"
               }`}
-              title={`${label} ${v} of 5`}
             />
-          ))}
-        </div>
-        <span className="text-[10px] text-muted-foreground w-10 text-right">{highLabel}</span>
+          </button>
+        ))}
+      </div>
+      <div className="flex justify-between -mt-1 px-2 text-[10px] text-muted-foreground">
+        <span>{lowLabel}</span>
+        <span>{highLabel}</span>
       </div>
     </div>
   );
@@ -280,7 +290,7 @@ function MoodCheckInCard() {
               key={t}
               type="button"
               onClick={() => toggle(feelings, t, setFeelings)}
-              className={`text-[11px] rounded-full border px-2.5 py-1 transition-colors ${
+              className={`text-xs rounded-full border px-3 py-1.5 transition-colors ${
                 feelings.includes(t)
                   ? "border-primary bg-primary/10 text-foreground"
                   : "border-border/60 text-muted-foreground hover:border-border"
@@ -294,7 +304,7 @@ function MoodCheckInCard() {
               key={`ctx-${t}`}
               type="button"
               onClick={() => toggle(contexts, t, setContexts)}
-              className={`text-[11px] rounded-full border border-dashed px-2.5 py-1 transition-colors ${
+              className={`text-xs rounded-full border border-dashed px-3 py-1.5 transition-colors ${
                 contexts.includes(t)
                   ? "border-primary bg-primary/10 text-foreground"
                   : "border-border/60 text-muted-foreground hover:border-border"
@@ -304,24 +314,25 @@ function MoodCheckInCard() {
             </button>
           ))}
         </div>
+        <div className="flex items-center justify-between gap-3 pt-1">
         {showNote ? (
           <Input
             value={note}
             onChange={e => setNote(e.target.value)}
             placeholder="Anything you want to remember about right now..."
-            className="text-sm"
+            className="text-base md:text-sm flex-1"
           />
         ) : (
           <button
             type="button"
             onClick={() => setShowNote(true)}
-            className="text-[11px] text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            className="h-10 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
           >
             + add a note
           </button>
         )}
         <Button
-          size="sm"
+          className="h-10 px-5 shrink-0"
           disabled={createMutation.isPending}
           onClick={() =>
             createMutation.mutate({
@@ -336,6 +347,7 @@ function MoodCheckInCard() {
         >
           {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Check in"}
         </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -415,12 +427,12 @@ function MoodTrendsView() {
     <div className="max-w-3xl space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-serif font-bold">How you've felt</h2>
-          <p className="text-xs text-muted-foreground mt-1">Patterns to notice, not scores to hit. Edit or remove anything here — including what Clover picked up from your chat.</p>
+          <h2 className="hidden md:block text-2xl font-serif font-bold">How you've felt</h2>
+          <p className="text-xs text-muted-foreground md:mt-1">Patterns to notice, not scores to hit. Edit or remove anything here — including what Clover picked up from your chat.</p>
         </div>
         <div className="flex gap-1 shrink-0">
           {([7, 14, 30] as const).map(d => (
-            <Button key={d} variant={days === d ? "secondary" : "ghost"} size="sm" className="h-7 px-2.5 text-xs" onClick={() => setDays(d)}>
+            <Button key={d} variant={days === d ? "secondary" : "ghost"} size="sm" className="h-9 md:h-7 px-3 md:px-2.5 text-xs" onClick={() => setDays(d)}>
               {d}d
             </Button>
           ))}
@@ -502,7 +514,7 @@ function MoodTrendsView() {
       )}
 
       {/* Entry list — everything editable and deletable, extraction included */}
-      <Card className="border-border/60">
+      <Card className="border-border/60 py-0 gap-0">
         <CardHeader className="p-5 border-b border-border/40">
           <CardTitle className="font-serif text-base font-bold">Entries</CardTitle>
         </CardHeader>
@@ -614,7 +626,7 @@ function NutrientPanel() {
           : "no data yet";
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border/60 py-0 gap-0">
       <CardHeader className="p-5 border-b border-border/40">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -710,7 +722,7 @@ function ReferralCard() {
   };
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border/60 py-0 gap-0">
       <CardHeader className="p-5 border-b border-border/40">
         <div className="flex items-center gap-2">
           <Gift className="h-5 w-5 text-primary" />
@@ -964,6 +976,21 @@ function RecipesTab({ profile }: { profile: { dietaryChoices?: string[] | null; 
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
+const TAB_TITLES: Record<string, string> = {
+  home: "Home",
+  "voice-logger": "Log a meal",
+  calendar: "Past logs",
+  "weekly-report": "Weekly report",
+  mood: "How you've felt",
+  settings: "Settings",
+  dashboard: "My stats",
+  recipes: "Recipes",
+  mealplan: "Meal planning",
+  billing: "Your plan",
+  travel: "Travel",
+  integrations: "Integrations",
+};
+
 export default function Home() {
   const { user, loading: authLoading, isAuthenticated, logout } = useAuth();
   const utils = trpc.useUtils();
@@ -1868,9 +1895,7 @@ export default function Home() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-primary/5 via-transparent to-transparent px-4">
         <div className="w-full max-w-md space-y-8 bg-card border border-border/40 p-8 rounded-2xl shadow-xl">
           <div className="text-center space-y-3">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Leaf className="h-6 w-6" />
-            </div>
+            <img src="/clover-mark.png" alt="" className="h-12 w-auto mx-auto" />
             <h2 className="text-3xl font-serif font-bold tracking-tight">Clover</h2>
             <p className="text-sm text-muted-foreground">
               Your session ended. Sign back in to keep tracking your nutrition.
@@ -1916,7 +1941,7 @@ export default function Home() {
               {onboardStep === "welcome" && (
                 <div className="space-y-4 text-center py-4">
                   <div className="flex items-center justify-center gap-2 text-primary font-serif font-bold text-2xl">
-                    <Leaf className="h-7 w-7" /> Clover
+                    <img src="/clover-mark.png" alt="" className="h-8 w-auto" /> Clover
                   </div>
                   <h3 className="font-serif text-xl font-bold">Food, in context — not on trial.</h3>
                   <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
@@ -2138,9 +2163,7 @@ export default function Home() {
       <aside className="w-full bg-card flex flex-col justify-between h-full">
         <div className="p-6 space-y-6">
           <div className="flex items-center gap-2 font-serif text-xl font-bold text-primary">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Leaf className="h-5 w-5" />
-            </div>
+            <img src="/clover-mark.png" alt="" className="h-8 w-auto" />
             <span>Clover</span>
           </div>
 
@@ -2244,9 +2267,11 @@ export default function Home() {
             <div className="flex items-center justify-between text-[10px] text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">
               <span className="flex items-center gap-1.5">
                 <Crown className="h-3 w-3 text-amber-500" />
-                <span className="font-semibold capitalize">{subscriptionQuery.data.tier}</span>
+                <span className="font-semibold capitalize">{subscriptionQuery.data.tier === "beta" ? "Beta tester" : subscriptionQuery.data.tier}</span>
               </span>
-              <span>{subscriptionQuery.data.aiCallsUsed} / {subscriptionQuery.data.aiCallsLimit === Infinity ? "∞" : subscriptionQuery.data.aiCallsLimit} AI calls</span>
+              {subscriptionQuery.data.tier !== "beta" && (
+                <span>{subscriptionQuery.data.aiCallsUsed} / {subscriptionQuery.data.aiCallsLimit === Infinity ? "∞" : subscriptionQuery.data.aiCallsLimit} AI calls</span>
+              )}
             </div>
           ) : null}
           <Button
@@ -2264,17 +2289,22 @@ export default function Home() {
       {/* ---- Main content ---- */}
       <SidebarInset className="flex-1 bg-muted/10 overflow-y-auto">
         {/* Mobile sticky header with hamburger */}
-        <header className="sticky top-0 z-20 flex md:hidden items-center gap-3 bg-background/95 backdrop-blur border-b border-border/40 px-4 py-3">
-          <SidebarTrigger className="h-8 w-8" />
-          <div className="flex items-center gap-2 font-serif font-bold text-primary">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Leaf className="h-4 w-4" />
-            </div>
-            <span className="text-sm">Clover</span>
-          </div>
-          <div className="ml-auto text-xs text-muted-foreground capitalize font-medium">{activeTab.replace("-", " ")}</div>
+        <header
+          className="sticky top-0 z-20 flex md:hidden items-center gap-2.5 bg-background/95 backdrop-blur border-b border-border/40 px-4 h-14"
+          style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+        >
+          <img src="/clover-mark.png" alt="Clover" className="h-6 w-auto" />
+          <h1 className="font-serif text-lg font-semibold truncate">{TAB_TITLES[activeTab]}</h1>
+          <button
+            type="button"
+            onClick={openFeedback}
+            className="ml-auto h-10 px-3 -mr-2 rounded-full flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+          >
+            <MessageSquare className="h-4 w-4" /> Feedback
+          </button>
         </header>
-        <div className="p-6 md:p-10">
+        <CloseMobileSidebarOnNavigate tab={activeTab} />
+        <div className="px-4 pt-5 pb-tabbar md:p-10">
 
         {/* ===== GOLDEN-PATH HOME ===== */}
         {activeTab === "home" && (
@@ -2305,6 +2335,9 @@ export default function Home() {
                 })()}
               </p>
             </div>
+
+            {/* Paid beta testers only: day, AI allowance, progress toward payout */}
+            <BetaStatusCard />
 
             {/* Quick mood check-in — optional, no streaks, nothing required */}
             <MoodCheckInCard />
@@ -2369,10 +2402,10 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight">Your Health Habits</h2>
-                <p className="text-xs text-muted-foreground mt-1">Real-time daily tracking powered by AI voice-logging.</p>
+                <h2 className="hidden md:block text-2xl sm:text-3xl font-serif font-bold tracking-tight">Your Health Habits</h2>
+                <p className="text-xs text-muted-foreground md:mt-1">Today at a glance, estimated from what you've logged.</p>
               </div>
-              <div className="flex gap-2 w-full sm:w-auto flex-col sm:flex-row">
+              <div className="hidden sm:flex gap-2 w-full sm:w-auto flex-col sm:flex-row">
                 <ImageMealLogger onSuccess={() => todayLogsQuery.refetch()} />
                 <Button onClick={() => setActiveTab("voice-logger")} className="gap-1.5 text-xs h-11 sm:h-auto min-w-11 sm:min-w-0">
                   <Mic className="h-4 w-4" /> Log Food
@@ -2381,7 +2414,7 @@ export default function Home() {
             </div>
 
             {/* Macro progress cards — 5 cards including fiber */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
               {[
                 { label: "Calories", value: Math.round(dailyTotals.calories), target: calorieTarget, unit: "kcal", color: "text-foreground" },
                 { label: "Protein", value: Math.round(dailyTotals.protein), target: proteinTarget, unit: "g", color: "text-emerald-600" },
@@ -2389,7 +2422,7 @@ export default function Home() {
                 { label: "Fat", value: Math.round(dailyTotals.fat), target: fatTarget, unit: "g", color: "text-amber-600" },
                 { label: "Fiber", value: Math.round(dailyTotals.fiber), target: fiberTarget, unit: "g", color: "text-violet-600" },
               ].map(({ label, value, target, unit, color }) => (
-                <Card key={label} className="border-border/60">
+                <Card key={label} className={`border-border/60 py-0 gap-0 ${label === "Calories" ? "col-span-2 lg:col-span-1" : ""}`}>
                   <CardHeader className="p-4 pb-2">
                     <CardDescription className={`text-[10px] font-bold uppercase tracking-wider ${color}`}>{label}</CardDescription>
                     <CardTitle className="font-serif text-xl font-bold mt-1">
@@ -2408,7 +2441,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <WaterIntakeCard />
               
-              <Card className="border-border/60 md:col-span-2 lg:col-span-2">
+              <Card className="border-border/60 md:col-span-2 lg:col-span-2 py-0 gap-0">
                 <CardHeader className="p-4 sm:p-5 border-b border-border/40">
                   <CardTitle className="font-serif text-sm sm:text-base font-bold">7-Day Calorie Trend</CardTitle>
                   <CardDescription className="text-xs">Your actual intake vs. daily target.</CardDescription>
@@ -2432,7 +2465,7 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              <Card className="border-border/60">
+              <Card className="border-border/60 py-0 gap-0">
                 <CardHeader className="p-4 sm:p-5 border-b border-border/40">
                   <CardTitle className="font-serif text-sm sm:text-base font-bold">Macro Split (Today)</CardTitle>
                   <CardDescription className="text-xs">Energy distribution in calories.</CardDescription>
@@ -2616,7 +2649,7 @@ export default function Home() {
 
             {/* ===== AI Health Overview Panel ===== */}
             <div className="mt-2">
-              <Card className="border-border/60">
+              <Card className="border-border/60 py-0 gap-0">
                 <CardHeader className="p-5 border-b border-border/40 flex flex-row items-center justify-between">
                   <div>
                     <CardTitle className="font-serif text-base font-bold flex items-center gap-2">
@@ -2683,7 +2716,7 @@ export default function Home() {
             {/* Floating button */}
             <button
               onClick={() => setShowAiChat(prev => !prev)}
-              className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-150"
+              className="fixed bottom-tabbar md:bottom-6 right-4 md:right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-150"
               title="Ask Clover about your nutrition"
             >
               <BrainCircuit className="h-6 w-6" />
@@ -2691,7 +2724,7 @@ export default function Home() {
 
             {/* Chat panel */}
             {showAiChat && (
-              <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 shadow-2xl rounded-2xl overflow-hidden border border-border/60 bg-card flex flex-col" style={{ height: "420px" }}>
+              <div className="fixed inset-x-3 bottom-[calc(var(--tabbar-h)+5rem)] md:inset-x-auto md:bottom-24 md:right-6 z-50 md:w-96 shadow-2xl rounded-2xl overflow-hidden border border-border/60 bg-card flex flex-col h-[min(420px,60dvh)]">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-muted/30">
                   <div className="flex items-center gap-2">
                     <BrainCircuit className="h-4 w-4 text-primary" />
@@ -2721,11 +2754,22 @@ export default function Home() {
 
         {/* ===== B. VOICE LOGGER (chat-style) ===== */}
         {activeTab === "voice-logger" && (
-          <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-8rem)]">
-            <div className="mb-4">
-              <h2 className="text-2xl font-serif font-bold">Voice Food Logger</h2>
+          <div className="max-w-2xl mx-auto flex flex-col h-[calc(100dvh-6.25rem-var(--tabbar-h))] md:h-[calc(100vh-8rem)]">
+            <div className="mb-4 hidden md:block">
+              <h2 className="text-2xl font-serif font-bold">Log a meal</h2>
               <p className="text-xs text-muted-foreground mt-1">Speak or type what you ate — or ask about your nutrition. Clover logs meals and answers from your own data.</p>
             </div>
+
+            {isGuest && (
+              <div className="md:hidden mb-3 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2">
+                <span className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-primary">Guest demo</span> · {Math.min(subscriptionQuery.data?.aiCallsUsed ?? 0, 10)}/10 free analyses
+                </span>
+                <a href={getSignInPageUrl()} className="shrink-0 text-xs font-semibold text-primary underline underline-offset-2">
+                  Create free account
+                </a>
+              </div>
+            )}
 
             {/* Chat area */}
             <div className="flex-1 overflow-y-auto space-y-3 pb-4 pr-1">
@@ -2892,7 +2936,7 @@ export default function Home() {
             )}
 
             {/* Input bar */}
-            <div className="flex gap-2 items-center border border-border/60 rounded-2xl bg-card px-3 py-2">
+            <div className="flex gap-1.5 md:gap-2 items-center border border-border/60 rounded-2xl bg-card px-2 md:px-3 py-1.5 md:py-2 shadow-sm">
               <input
                 ref={photoInputRef}
                 type="file"
@@ -2908,15 +2952,17 @@ export default function Home() {
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={isAnalyzing || isAnalyzingPhoto}
-                className="shrink-0 h-8 w-8 rounded-full flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+                className="shrink-0 h-10 w-10 md:h-8 md:w-8 rounded-full flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
                 title="Log from a photo"
+                aria-label="Log from a photo"
               >
                 <Camera className="h-4 w-4" />
               </button>
               <button
                 type="button"
                 onClick={isRecording ? stopRecording : startRecording}
-                className={`shrink-0 h-8 w-8 rounded-full flex items-center justify-center transition-colors ${
+                aria-label={isRecording ? "Stop recording" : "Speak your meal"}
+                className={`shrink-0 h-10 w-10 md:h-8 md:w-8 rounded-full flex items-center justify-center transition-colors ${
                   isRecording
                     ? "bg-destructive text-destructive-foreground animate-pulse"
                     : "bg-primary/10 text-primary hover:bg-primary/20"
@@ -2929,15 +2975,17 @@ export default function Home() {
                 value={chatInput}
                 onChange={e => { setChatInput(e.target.value); chatInputWasVoiceRef.current = false; }}
                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendChat(); } }}
-                placeholder={awaitingClarification ? "Answer the question above..." : "Log a meal or ask me anything..."}
-                className="border-0 shadow-none focus-visible:ring-0 text-sm bg-transparent"
+                placeholder={awaitingClarification ? "Answer the question above..." : "What did you eat?"}
+                className="border-0 shadow-none focus-visible:ring-0 text-base md:text-sm bg-transparent px-1.5"
+                enterKeyHint="send"
                 disabled={isAnalyzing || isAnalyzingPhoto}
               />
               <Button
                 size="sm"
                 onClick={handleSendChat}
                 disabled={!chatInput.trim() || isAnalyzing || isAnalyzingPhoto}
-                className="shrink-0 h-8 w-8 p-0 rounded-full"
+                className="shrink-0 h-10 w-10 md:h-8 md:w-8 p-0 rounded-full"
+                aria-label="Send"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -2948,7 +2996,14 @@ export default function Home() {
         {/* ===== WEEKLY COMPASSIONATE EXPORT ===== */}
         {activeTab === "weekly-report" && (
           <div className="max-w-2xl mx-auto space-y-6" id="weekly-report-page">
-            {!weeklyReport ? (
+            {weeklyReportQuery.isError ? (
+              <div className="text-center py-16 space-y-3">
+                <p className="text-sm text-muted-foreground">Couldn't load your weekly report just now.</p>
+                <Button variant="outline" className="h-11 md:h-9" onClick={() => weeklyReportQuery.refetch()}>
+                  <RefreshCw className="h-4 w-4 mr-1.5" /> Try again
+                </Button>
+              </div>
+            ) : !weeklyReport ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground py-16 justify-center">
                 <Loader2 className="h-4 w-4 animate-spin" /> Putting your week together...
               </div>
@@ -3068,10 +3123,10 @@ export default function Home() {
         {/* ===== SETTINGS (goal / reminder / export email + health profile) ===== */}
         {activeTab === "settings" && (
           <div className="max-w-2xl space-y-6">
-            <h2 className="text-2xl font-serif font-bold">Settings</h2>
+            <h2 className="hidden md:block text-2xl font-serif font-bold">Settings</h2>
 
             {/* Primary goal — same fixed enum as onboarding */}
-            <Card className="border-border/60">
+            <Card className="border-border/60 py-0 gap-0">
               <CardHeader className="p-5 border-b border-border/40">
                 <CardTitle className="font-serif text-base font-bold">Primary goal</CardTitle>
                 <CardDescription className="text-xs">Shapes what your weekly report highlights. Changes apply going forward — past reports stay as they were.</CardDescription>
@@ -3099,29 +3154,26 @@ export default function Home() {
             </Card>
 
             {/* Daily reminder — independent toggle, off by default */}
-            <Card className="border-border/60">
+            <Card className="border-border/60 py-0 gap-0">
               <CardHeader className="p-5 border-b border-border/40">
                 <CardTitle className="font-serif text-base font-bold">Daily reminder</CardTitle>
                 <CardDescription className="text-xs">One reminder at a time you pick — no escalation, no re-prompts. Off unless you turn it on.</CardDescription>
               </CardHeader>
               <CardContent className="p-5 space-y-3">
-                <div className="flex items-center justify-between">
+                <label className="flex items-center justify-between gap-4 min-h-11 cursor-pointer">
                   <span className="text-sm">Remind me once a day</span>
-                  <Button
-                    variant={settingsQuery.data?.reminderEnabled ? "default" : "outline"}
-                    size="sm"
+                  <Switch
+                    checked={!!settingsQuery.data?.reminderEnabled}
                     disabled={setReminderMutation.isPending}
-                    onClick={() => {
+                    onCheckedChange={() => {
                       const enabled = !settingsQuery.data?.reminderEnabled;
                       setReminderMutation.mutate(
                         { enabled, time: enabled ? (settingsQuery.data?.reminderTime ?? "18:00") : null },
                         { onSuccess: () => toast.success(enabled ? "Reminder on" : "Reminder off") }
                       );
                     }}
-                  >
-                    {settingsQuery.data?.reminderEnabled ? "On" : "Off"}
-                  </Button>
-                </div>
+                  />
+                </label>
                 {settingsQuery.data?.reminderEnabled && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">At</span>
@@ -3131,7 +3183,7 @@ export default function Home() {
                       onChange={e =>
                         setReminderMutation.mutate({ enabled: true, time: e.target.value })
                       }
-                      className="rounded-md border border-input bg-background px-2 py-1 text-sm"
+                      className="rounded-md border border-input bg-background px-3 h-11 md:h-9 text-base md:text-sm"
                     />
                   </div>
                 )}
@@ -3139,34 +3191,31 @@ export default function Home() {
             </Card>
 
             {/* Weekly export email — separate from the reminder, never bundled */}
-            <Card className="border-border/60">
+            <Card className="border-border/60 py-0 gap-0">
               <CardHeader className="p-5 border-b border-border/40">
                 <CardTitle className="font-serif text-base font-bold">Weekly report by email</CardTitle>
                 <CardDescription className="text-xs">The in-app report is always available either way.</CardDescription>
               </CardHeader>
               <CardContent className="p-5">
-                <div className="flex items-center justify-between">
+                <label className="flex items-center justify-between gap-4 min-h-11 cursor-pointer">
                   <span className="text-sm">Email me my weekly report</span>
-                  <Button
-                    variant={settingsQuery.data?.weeklyExportEmail ? "default" : "outline"}
-                    size="sm"
+                  <Switch
+                    checked={!!settingsQuery.data?.weeklyExportEmail}
                     disabled={setExportEmailMutation.isPending}
-                    onClick={() => {
+                    onCheckedChange={() => {
                       const enabled = !settingsQuery.data?.weeklyExportEmail;
                       setExportEmailMutation.mutate(
                         { enabled },
                         { onSuccess: () => toast.success(enabled ? "Email on" : "Email off") }
                       );
                     }}
-                  >
-                    {settingsQuery.data?.weeklyExportEmail ? "On" : "Off"}
-                  </Button>
-                </div>
+                  />
+                </label>
               </CardContent>
             </Card>
 
             {/* Mood & feelings — passive extraction toggle */}
-            <Card className="border-border/60">
+            <Card className="border-border/60 py-0 gap-0">
               <CardHeader className="p-5 border-b border-border/40">
                 <CardTitle className="font-serif text-base font-bold">Mood & feelings</CardTitle>
                 <CardDescription className="text-xs">
@@ -3174,28 +3223,25 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-5">
-                <div className="flex items-center justify-between">
+                <label className="flex items-center justify-between gap-4 min-h-11 cursor-pointer">
                   <span className="text-sm">Notice feelings mentioned in chat</span>
-                  <Button
-                    variant={settingsQuery.data?.moodExtractionEnabled ? "default" : "outline"}
-                    size="sm"
+                  <Switch
+                    checked={!!settingsQuery.data?.moodExtractionEnabled}
                     disabled={setMoodExtractionMutation.isPending}
-                    onClick={() => {
+                    onCheckedChange={() => {
                       const enabled = !settingsQuery.data?.moodExtractionEnabled;
                       setMoodExtractionMutation.mutate(
                         { enabled },
                         { onSuccess: () => toast.success(enabled ? "Clover will quietly notice context you mention" : "Chat extraction off — manual check-ins still work") }
                       );
                     }}
-                  >
-                    {settingsQuery.data?.moodExtractionEnabled ? "On" : "Off"}
-                  </Button>
-                </div>
+                  />
+                </label>
               </CardContent>
             </Card>
 
             {/* Health profile — moved here from onboarding to keep the golden path short */}
-            <Card className="border-border/60">
+            <Card className="border-border/60 py-0 gap-0">
               <CardHeader className="p-5 border-b border-border/40">
                 <CardTitle className="font-serif text-base font-bold">Health profile</CardTitle>
                 <CardDescription className="text-xs">Allergies are flagged in every meal analysis. All optional.</CardDescription>
@@ -3331,7 +3377,7 @@ export default function Home() {
 
             {/* Day detail */}
             {calendarDayMs !== null && (
-              <Card className="border-border/60">
+              <Card className="border-border/60 py-0 gap-0">
                 <CardHeader className="p-5 border-b border-border/40">
                   <CardTitle className="font-serif text-base font-bold">
                     {new Date(calendarDayMs).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
@@ -3400,7 +3446,7 @@ export default function Home() {
               <p className="text-xs text-muted-foreground mt-1">Diet-compliant eatery recommendations cross-referenced with your travel calendar.</p>
             </div>
             {MOCK_TRAVEL_CALENDAR.map(travel => (
-              <Card key={travel.id} className="border-border/60">
+              <Card key={travel.id} className="border-border/60 py-0 gap-0">
                 <CardHeader className="p-5 border-b border-border/40 flex flex-row justify-between items-center">
                   <div>
                     <CardTitle className="font-serif text-base font-bold">Travel to {travel.city}</CardTitle>
@@ -3474,7 +3520,7 @@ export default function Home() {
         {activeTab === "billing" && (
           <div className="max-w-3xl space-y-8">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight">Manage Your Plan</h2>
+              <h2 className="hidden md:block text-2xl sm:text-3xl font-serif font-bold tracking-tight">Manage Your Plan</h2>
               <p className="text-xs text-muted-foreground mt-1">Upgrade or manage your Clover subscription.</p>
             </div>
 
@@ -3485,13 +3531,17 @@ export default function Home() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Crown className="h-5 w-5 text-amber-500" />
-                      <span className="font-serif font-bold text-base capitalize">Current Plan: Clover {subscriptionQuery.data.tier}</span>
+                      <span className="font-serif font-bold text-base capitalize">
+                        Current plan: {subscriptionQuery.data.tier === "beta" ? "Clover beta tester" : `Clover ${subscriptionQuery.data.tier}`}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      AI logs used this month: <strong>{subscriptionQuery.data.aiCallsUsed}</strong> / {subscriptionQuery.data.aiCallsLimit === Infinity ? "Unlimited" : subscriptionQuery.data.aiCallsLimit}
+                      {subscriptionQuery.data.tier === "beta"
+                        ? "Up to 20 AI analyses a day and 100 for your beta week. You'll move to the free plan automatically when the week ends."
+                        : <>AI logs used this month: <strong>{subscriptionQuery.data.aiCallsUsed}</strong> / {subscriptionQuery.data.aiCallsLimit === Infinity ? "Unlimited" : subscriptionQuery.data.aiCallsLimit}</>}
                     </p>
                   </div>
-                  {subscriptionQuery.data.tier !== "free" && (
+                  {subscriptionQuery.data.tier !== "free" && subscriptionQuery.data.tier !== "beta" && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -3510,14 +3560,14 @@ export default function Home() {
             )}
 
             {/* Plan cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {([
                 {
                   tier: "free" as const,
                   name: "Clover Free",
                   price: "$0",
                   period: "forever",
-                  features: ["10 AI voice logs / month", "Basic dashboard", "7-day history"],
+                  features: ["10 AI-analyzed logs per month", "Voice, text and photo logging", "Vitamin, mineral and mood tracking", "Weekly summary"],
                   cta: "Current Plan",
                   highlight: false,
                 },
@@ -3526,7 +3576,7 @@ export default function Home() {
                   name: "Clover Plus",
                   price: "$7.99",
                   period: "/ month",
-                  features: ["Unlimited AI voice logs", "Full history & calendar", "AI health overview", "Recipe recommendations"],
+                  features: ["Unlimited AI-analyzed logs", "Unlimited questions about your eating", "Everything in Free"],
                   cta: "Upgrade to Plus",
                   highlight: true,
                 },
@@ -3535,17 +3585,12 @@ export default function Home() {
                   name: "Clover Pro",
                   price: "$14.99",
                   period: "/ month",
-                  features: ["Everything in Plus", "Travel sourcing", "Weekly email digest", "Priority AI", "CSV export"],
+                  features: ["Everything in Plus"],
                   cta: "Upgrade to Pro",
                   highlight: false,
                 },
-              ]).map(plan => (
-                <Card key={plan.tier} className={`border-border/60 relative ${plan.highlight ? "border-primary ring-1 ring-primary/30" : ""}`}>
-                  {plan.highlight && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-primary text-primary-foreground text-[10px] px-3">Most Popular</Badge>
-                    </div>
-                  )}
+              ]).filter(plan => plan.tier !== "pro" || subscriptionQuery.data?.tier === "pro").map(plan => (
+                <Card key={plan.tier} className={`border-border/60 relative py-0 gap-0 ${plan.highlight ? "border-primary ring-1 ring-primary/30" : ""}`}>
                   <CardHeader className="p-5 border-b border-border/40">
                     <CardTitle className="font-serif text-base font-bold">{plan.name}</CardTitle>
                     <div className="mt-2">
@@ -3562,13 +3607,12 @@ export default function Home() {
                       ))}
                     </ul>
                     {plan.tier === "free" ? (
-                      <Button variant="outline" size="sm" className="w-full text-xs" disabled>
-                        {subscriptionQuery.data?.tier === "free" ? "Current Plan" : "Downgraded"}
+                      <Button variant="outline" className="w-full h-11 md:h-9 text-sm md:text-xs" disabled>
+                        {subscriptionQuery.data?.tier === "free" ? "Current plan" : "Free plan"}
                       </Button>
                     ) : (
                       <Button
-                        size="sm"
-                        className="w-full text-xs"
+                        className="w-full h-11 md:h-9 text-sm md:text-xs"
                         variant={plan.highlight ? "default" : "outline"}
                         disabled={checkoutMutation.isPending || subscriptionQuery.data?.tier === plan.tier}
                         onClick={() => {
@@ -3591,19 +3635,26 @@ export default function Home() {
               ))}
             </div>
 
-            <p className="text-[10px] text-muted-foreground text-center">
-              Test card: 4242 4242 4242 4242 · Any future date · Any CVC. Payments are processed securely by Stripe.
+            <p className="text-[11px] text-muted-foreground text-center">
+              {import.meta.env.DEV && "Test card: 4242 4242 4242 4242 · Any future date · Any CVC. "}
+              Payments are processed securely by Stripe. Cancel anytime.
             </p>
           </div>
         )}
 
       </div>{/* end p-6 inner div */}
       </SidebarInset>
+      <MobileTabBar
+        activeTab={activeTab}
+        onSelect={setActiveTab}
+        moreTabs={["mood", "settings", "dashboard", "recipes", "mealplan", "billing"] as const}
+        weeklyReportReady={weeklyReportReady}
+      />
 
       {/* ===== UPGRADE MODAL ===== */}
       {showUpgradeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-md border-primary/30 shadow-2xl">
+          <Card className="w-full max-w-md border-primary/30 shadow-2xl py-0 gap-0">
             <CardHeader className="p-6 border-b border-border/40">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">

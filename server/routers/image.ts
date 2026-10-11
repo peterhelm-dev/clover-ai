@@ -7,6 +7,7 @@ import { getDb } from "../db";
 import { foodLogs } from "../../drizzle/schema";
 import { getOrCreateSubscription, incrementAICallsUsed } from "../db-subscriptions";
 import { GUEST_AI_LIMIT, GUEST_LIMIT_MESSAGE } from "../products";
+import { consumeBetaAiCall } from "../beta-program";
 
 /**
  * Image-based meal logging router.
@@ -49,6 +50,7 @@ export const imageRouter = router({
       })
     )
     .mutation(async ({ input, ctx }: any) => {
+      await consumeBetaAiCall(ctx.user.id);
       // Guests share the same hard demo cap as the chat — photo analysis is
       // an AI call too, so it can't be a loophole around the 10-try limit.
       if (ctx.user.loginMethod === "anonymous") {

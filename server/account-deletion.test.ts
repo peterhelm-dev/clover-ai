@@ -52,7 +52,7 @@ describe("deleteUserAccount", () => {
     expect(calls.at(-3)).toBe("delete:users");
     expect(calls.at(-2)).toBe("tx:commit");
     expect(calls.at(-1)).toBe("auth:auth-uuid");
-    for (const table of ["foodLogs", "moodEntries", "subscriptions", "userProfiles", "waitlist", "referrals"]) {
+    for (const table of ["foodLogs", "moodEntries", "subscriptions", "userProfiles", "waitlist", "referrals", "betaEnrollments"]) {
       expect(calls).toContain(`delete:${table}`);
     }
     expect(calls).toContain("update:betaInvites");

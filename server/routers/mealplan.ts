@@ -4,6 +4,7 @@ import { getDb } from "../db";
 import { mealPlans } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
+import { consumeBetaAiCall } from "../beta-program";
 
 const mealSchema = z.object({
   day: z.string(),
@@ -27,6 +28,7 @@ export const mealPlanRouter = router({
       const db = await getDb();
       if (!db) throw new Error("Database not available");
 
+      await consumeBetaAiCall(ctx.user.id);
       // Call LLM to generate meal suggestions
       const response = await invokeLLM({
         messages: [
