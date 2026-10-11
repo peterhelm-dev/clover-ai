@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+import { getSignInPageUrl } from "@/const";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ export default function BetaInvitePage() {
   const handleRedeem = () => {
     if (!isAuthenticated) {
       // Redirect to login, come back here after (encode returnPath + inviteCode in OAuth state)
-      window.location.href = getLoginUrl(`/beta/${code}`, code);
+      window.location.href = getSignInPageUrl(`/beta/${code}`, code);
       return;
     }
     redeemMutation.mutate({ code });

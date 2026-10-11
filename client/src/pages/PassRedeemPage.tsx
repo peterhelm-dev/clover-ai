@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+import { getSignInPageUrl } from "@/const";
 
 /**
  * /pass/:code — a share link that grants free unlimited AI access,
@@ -58,7 +58,7 @@ export default function PassRedeemPage() {
           <p className="text-sm font-medium">You've been given free unlimited access to Clover.</p>
           {infoQuery.data.label && <p className="text-xs text-muted-foreground">Pass: {infoQuery.data.label}</p>}
           <p className="text-xs text-muted-foreground">Sign in to claim it — takes about ten seconds.</p>
-          <Button onClick={() => (window.location.href = getLoginUrl(`/pass/${code}`))}>
+          <Button onClick={() => (window.location.href = getSignInPageUrl(`/pass/${code}`))}>
             Sign in & claim
           </Button>
         </div>

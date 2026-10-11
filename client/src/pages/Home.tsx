@@ -7,7 +7,7 @@ import { DeleteAccountCard } from "@/components/DeleteAccountCard";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { FEATURE_FLAGS } from "@/lib/featureFlags";
-import { getLoginUrl } from "@/const";
+import { getSignInPageUrl } from "@/const";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -2234,7 +2234,7 @@ export default function Home() {
                 </span>
               </div>
               <a
-                href={getLoginUrl()}
+                href={getSignInPageUrl()}
                 className="block text-center text-[11px] font-medium rounded-md bg-primary text-primary-foreground py-1.5 hover:opacity-90 transition-opacity"
               >
                 Create a free account
@@ -2875,7 +2875,7 @@ export default function Home() {
                 <p className="text-sm font-medium">That's the guest demo — 10 AI analyses, all real.</p>
                 <p className="text-xs text-muted-foreground">A free account gets you 10 AI logs a month, weekly reports, and nutrient tracking — no credit card.</p>
                 <a
-                  href={getLoginUrl()}
+                  href={getSignInPageUrl()}
                   className="inline-block text-xs font-medium rounded-lg bg-primary text-primary-foreground px-4 py-2 hover:opacity-90 transition-opacity"
                 >
                   Create a free account
