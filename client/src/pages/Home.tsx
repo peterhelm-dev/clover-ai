@@ -2471,8 +2471,8 @@ export default function Home() {
                   <Loader2 className="h-4 w-4 animate-spin" /> Loading...
                 </div>
               ) : dbLogs.length === 0 ? (
-                <div className="text-center py-12 border border-dashed border-border/60 rounded-xl text-muted-foreground">
-                  <Mic className="h-8 w-8 mx-auto mb-3 stroke-1" />
+                <div className="text-center py-10 border border-dashed border-border/60 rounded-xl text-muted-foreground">
+                  <img src="/images/empty-day.webp" alt="" className="h-28 w-auto mx-auto mb-3 rounded-xl" />
                   <p className="text-sm font-medium">No logs yet today</p>
                   <p className="text-xs mt-1">Tap "Log Food" or visit the Voice Logger to get started.</p>
                 </div>
@@ -2730,8 +2730,8 @@ export default function Home() {
             {/* Chat area */}
             <div className="flex-1 overflow-y-auto space-y-3 pb-4 pr-1">
               {chatMessages.length === 0 && (
-                <div className="text-center py-16 text-muted-foreground">
-                  <Mic className="h-10 w-10 mx-auto mb-3 stroke-1" />
+                <div className="text-center py-12 text-muted-foreground">
+                  <img src="/images/empty-chat.webp" alt="" className="h-28 w-28 mx-auto mb-3 rounded-2xl" />
                   <p className="text-sm font-medium">Log a meal — or just ask</p>
                   <p className="text-xs mt-1">Try: "I had oatmeal with banana and a coffee" · "How's my protein this week?" · "I've been feeling tired lately"</p>
                 </div>
