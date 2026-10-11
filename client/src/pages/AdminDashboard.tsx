@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { PaidBetaTab } from "@/components/admin/PaidBetaTab";
 import {
   Users,
   FlaskConical,
@@ -39,7 +40,7 @@ import {
   MessageSquarePlus,
 } from "lucide-react";
 
-type Tab = "overview" | "users" | "waitlist" | "referrals" | "beta_invites" | "beta_feedback" | "access_passes";
+type Tab = "overview" | "paid_beta" | "users" | "waitlist" | "referrals" | "beta_invites" | "beta_feedback" | "access_passes";
 
 export default function AdminDashboard() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -72,12 +73,12 @@ export default function AdminDashboard() {
       {/* Nav tabs */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex gap-1 -mb-px">
-            {(["overview", "users", "waitlist", "referrals", "beta_invites", "beta_feedback", "access_passes"] as Tab[]).map((tab) => (
+          <nav className="flex gap-1 -mb-px overflow-x-auto">
+            {(["overview", "paid_beta", "users", "waitlist", "referrals", "beta_invites", "beta_feedback", "access_passes"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-3 text-sm font-medium border-b-2 capitalize transition-colors ${
+                className={`px-4 py-3 text-sm font-medium border-b-2 capitalize whitespace-nowrap transition-colors ${
                   activeTab === tab
                     ? "border-blue-600 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700"
@@ -92,6 +93,7 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === "overview" && <OverviewTab />}
+        {activeTab === "paid_beta" && <PaidBetaTab />}
         {activeTab === "users" && (
           <UsersTab page={userPage} onPageChange={setUserPage} />
         )}

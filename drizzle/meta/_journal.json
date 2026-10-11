@@ -64,6 +64,13 @@
       "when": 1785350541855,
       "tag": "0008_lock-down-rls",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791726755550,
+      "tag": "0009_paid-beta-program",
+      "breakpoints": true
     }
   ]
 }

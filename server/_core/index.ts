@@ -1,4 +1,9 @@
 import "dotenv/config";
+import { eq } from "drizzle-orm";
+import { betaEnrollments } from "../../drizzle/schema";
+import { getDb } from "../db";
+import { verifyUnsubscribeToken } from "../email";
+import { startBetaScheduler } from "../beta-scheduler";
 import express from "express";
 import { initSentry, sentryErrorHandler } from "./sentry";
 import { createServer } from "http";
@@ -90,6 +95,25 @@ async function startServer() {
 
   registerStorageProxy(app);
 
+  // One-click unsubscribe from beta emails (GET from the email link,
+  // POST from mail clients honouring List-Unsubscribe-Post).
+  const betaUnsubscribe: express.RequestHandler = async (req, res) => {
+    const userId = verifyUnsubscribeToken(String(req.query.token ?? ""));
+    if (userId === null) {
+      res.status(400).send("This unsubscribe link isn't valid.");
+      return;
+    }
+    const db = await getDb();
+    await db?.update(betaEnrollments).set({ emailOptOut: 1 }).where(eq(betaEnrollments.userId, userId));
+    res
+      .status(200)
+      .send(
+        '<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="font-family:-apple-system,sans-serif;background:#FAF6EE;color:#1F2A24;display:grid;place-items:center;min-height:90vh;text-align:center"><div><h2>You won\'t get more beta emails.</h2><p>Your account and logs are unaffected.</p></div></body>'
+      );
+  };
+  app.get("/api/beta/unsubscribe", betaUnsubscribe);
+  app.post("/api/beta/unsubscribe", betaUnsubscribe);
+
   // Rate limiting — AI routes first (more restrictive), then general
   app.use("/api/trpc/nutrition", aiLimiter);
   app.use("/api/trpc/healthInsights", aiLimiter);
@@ -127,6 +151,7 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+  startBetaScheduler();
 }
 
 startServer().catch(err => {

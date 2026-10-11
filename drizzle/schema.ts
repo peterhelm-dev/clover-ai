@@ -41,7 +41,8 @@ export const primaryGoalEnum = pgEnum("primary_goal", [
   "digestive_health",
   "general_awareness",
 ]);
-export const tierEnum = pgEnum("tier", ["free", "plus", "pro"]);
+/** "beta" = the paid 7-day tester program: its own capped tier, auto-reverts to free. */
+export const tierEnum = pgEnum("tier", ["free", "plus", "pro", "beta"]);
 export const referralStatusEnum = pgEnum("referral_status", ["pending", "credited"]);
 export const feedbackCategoryEnum = pgEnum("feedback_category", [
   "general",
@@ -261,6 +262,10 @@ export const appSettings = pgTable("appSettings", {
   id: serial("id").primaryKey(),
   /** If true, only users with valid beta invites can sign up */
   inviteOnly: integer("inviteOnly").default(0).notNull(), // 0=false, 1=true
+  /** Paid beta program: how many testers the public /join link accepts in total. */
+  betaSpots: integer("betaSpots").default(20).notNull(),
+  /** 1 = the /join link accepts new testers (until spots run out); 0 = closed. */
+  betaOpen: integer("betaOpen").default(1).notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
@@ -413,3 +418,45 @@ export const accessPassRedemptions = pgTable(
 );
 
 export type AccessPassRedemption = typeof accessPassRedemptions.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// Paid beta program — one row per tester who joined via the public /join link.
+// The 7-day window, AI caps, daily emails, final feedback and the $25 payout
+// all hang off this row. The user's subscription tier is "beta" while active.
+// ---------------------------------------------------------------------------
+export const betaStatusEnum = pgEnum("beta_status", ["active", "ended"]);
+export const payoutMethodEnum = pgEnum("payout_method", ["paypal", "venmo"]);
+
+export const betaEnrollments = pgTable(
+  "betaEnrollments",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("userId").notNull().unique(),
+    status: betaStatusEnum("status").default("active").notNull(),
+    startedAt: timestamp("startedAt").defaultNow().notNull(),
+    endsAt: timestamp("endsAt").notNull(),
+    endedAt: timestamp("endedAt"),
+    /** AI usage caps: per UTC day and for the whole week. */
+    aiCallsDay: varchar("aiCallsDay", { length: 10 }), // "YYYY-MM-DD" the daily counter belongs to
+    aiCallsToday: integer("aiCallsToday").default(0).notNull(),
+    aiCallsTotal: integer("aiCallsTotal").default(0).notNull(),
+    /** Distinct UTC days ("YYYY-MM-DD") the tester used AI during the week — payout needs 5. */
+    activeDays: jsonb("activeDays").$type<string[]>().default([]).notNull(),
+    /** Daily email bookkeeping (idempotent across scheduler ticks). */
+    lastDailyEmailOn: varchar("lastDailyEmailOn", { length: 10 }),
+    endEmailSentAt: timestamp("endEmailSentAt"),
+    feedbackReminderSentAt: timestamp("feedbackReminderSentAt"),
+    emailOptOut: integer("emailOptOut").default(0).notNull(),
+    /** Final feedback form. */
+    feedbackSubmittedAt: timestamp("feedbackSubmittedAt"),
+    feedback: jsonb("feedback").$type<Record<string, string | number | null>>(),
+    /** Payout. */
+    payoutMethod: payoutMethodEnum("payoutMethod"),
+    payoutHandle: varchar("payoutHandle", { length: 128 }),
+    paidAt: timestamp("paidAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("beta_enrollments_status_idx").on(table.status)]
+);
+
+export type BetaEnrollment = typeof betaEnrollments.$inferSelect;

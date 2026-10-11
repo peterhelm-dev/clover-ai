@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { getOrCreateSubscription, incrementAICallsUsed } from "../db-subscriptions";
 import { getAICallLimit, GUEST_AI_LIMIT, GUEST_LIMIT_MESSAGE } from "../products";
 import { buildLogContext, SYMPTOM_GUARDRAILS } from "../log-context";
+import { consumeBetaAiCall } from "../beta-program";
 import { MICRONUTRIENT_KEYS } from "../nutrients";
 
 // Re-export for existing importers (foodLogs router, tests).
@@ -229,6 +230,9 @@ export const nutritionRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { transcript, clarificationContext, knownAllergies } = input;
+
+      // Beta testers: daily + weekly caps (throws when hit; ends the week if it's over).
+      await consumeBetaAiCall(ctx.user.id);
 
       // Check AI call limit for this user's subscription tier
       // Auto-create free subscription if it doesn't exist

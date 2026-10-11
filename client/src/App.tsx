@@ -13,6 +13,8 @@ import LoginPage from "./pages/LoginPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import FeedbackButton from "./components/FeedbackButton";
+import JoinBetaPage from "./pages/JoinBetaPage";
+import BetaFeedbackPage from "./pages/BetaFeedbackPage";
 import { useAuth } from "./_core/hooks/useAuth";
 
 /**
@@ -47,6 +49,9 @@ function Router() {
       <Route path="/" component={RootRoute} />
       <Route path="/login" component={LoginPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/join" component={JoinBetaPage} />
+      {/* Must come before /beta/:code, which would otherwise treat "feedback" as an invite code. */}
+      <Route path="/beta/feedback" component={BetaFeedbackPage} />
       <Route path="/beta/:code" component={BetaInvitePage} />
       <Route path="/pass/:code" component={PassRedeemPage} />
       <Route path="/privacy" component={PrivacyPolicy} />

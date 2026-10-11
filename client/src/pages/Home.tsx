@@ -4,6 +4,7 @@ import { ImageMealLogger } from "@/components/ImageMealLogger";
 import { WaterIntakeCard } from "@/components/WaterIntakeCard";
 import { MealPlanningTab } from "@/components/MealPlanningTab";
 import { DeleteAccountCard } from "@/components/DeleteAccountCard";
+import { BetaStatusCard } from "@/components/BetaStatusCard";
 import { MobileTabBar, CloseMobileSidebarOnNavigate } from "@/components/MobileTabBar";
 import { openFeedback } from "@/components/FeedbackButton";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -2266,9 +2267,11 @@ export default function Home() {
             <div className="flex items-center justify-between text-[10px] text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">
               <span className="flex items-center gap-1.5">
                 <Crown className="h-3 w-3 text-amber-500" />
-                <span className="font-semibold capitalize">{subscriptionQuery.data.tier}</span>
+                <span className="font-semibold capitalize">{subscriptionQuery.data.tier === "beta" ? "Beta tester" : subscriptionQuery.data.tier}</span>
               </span>
-              <span>{subscriptionQuery.data.aiCallsUsed} / {subscriptionQuery.data.aiCallsLimit === Infinity ? "∞" : subscriptionQuery.data.aiCallsLimit} AI calls</span>
+              {subscriptionQuery.data.tier !== "beta" && (
+                <span>{subscriptionQuery.data.aiCallsUsed} / {subscriptionQuery.data.aiCallsLimit === Infinity ? "∞" : subscriptionQuery.data.aiCallsLimit} AI calls</span>
+              )}
             </div>
           ) : null}
           <Button
@@ -2332,6 +2335,9 @@ export default function Home() {
                 })()}
               </p>
             </div>
+
+            {/* Paid beta testers only: day, AI allowance, progress toward payout */}
+            <BetaStatusCard />
 
             {/* Quick mood check-in — optional, no streaks, nothing required */}
             <MoodCheckInCard />
@@ -3525,13 +3531,17 @@ export default function Home() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Crown className="h-5 w-5 text-amber-500" />
-                      <span className="font-serif font-bold text-base capitalize">Current Plan: Clover {subscriptionQuery.data.tier}</span>
+                      <span className="font-serif font-bold text-base capitalize">
+                        Current plan: {subscriptionQuery.data.tier === "beta" ? "Clover beta tester" : `Clover ${subscriptionQuery.data.tier}`}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      AI logs used this month: <strong>{subscriptionQuery.data.aiCallsUsed}</strong> / {subscriptionQuery.data.aiCallsLimit === Infinity ? "Unlimited" : subscriptionQuery.data.aiCallsLimit}
+                      {subscriptionQuery.data.tier === "beta"
+                        ? "Up to 20 AI analyses a day and 100 for your beta week. You'll move to the free plan automatically when the week ends."
+                        : <>AI logs used this month: <strong>{subscriptionQuery.data.aiCallsUsed}</strong> / {subscriptionQuery.data.aiCallsLimit === Infinity ? "Unlimited" : subscriptionQuery.data.aiCallsLimit}</>}
                     </p>
                   </div>
-                  {subscriptionQuery.data.tier !== "free" && (
+                  {subscriptionQuery.data.tier !== "free" && subscriptionQuery.data.tier !== "beta" && (
                     <Button
                       variant="outline"
                       size="sm"

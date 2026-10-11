@@ -11,6 +11,7 @@
 import { eq, or } from "drizzle-orm";
 import {
   accessPassRedemptions,
+  betaEnrollments,
   betaFeedback,
   betaInvites,
   events,
@@ -100,6 +101,7 @@ export async function deleteUserAccount(
     await tx.delete(waterIntake).where(eq(waterIntake.userId, id));
     await tx.delete(mealPlans).where(eq(mealPlans.userId, id));
     await tx.delete(betaFeedback).where(eq(betaFeedback.userId, id));
+    await tx.delete(betaEnrollments).where(eq(betaEnrollments.userId, id));
     await tx.delete(accessPassRedemptions).where(eq(accessPassRedemptions.userId, id));
     await tx.delete(referrals).where(or(eq(referrals.referrerId, id), eq(referrals.referredUserId, id)));
     // Keep the invite record (it belongs to whoever issued it), just forget who redeemed it.

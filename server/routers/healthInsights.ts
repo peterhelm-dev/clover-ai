@@ -3,6 +3,7 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import { buildLogContext, SYMPTOM_GUARDRAILS } from "../log-context";
+import { consumeBetaAiCall } from "../beta-program";
 
 // ---------------------------------------------------------------------------
 // Router
@@ -25,6 +26,7 @@ Format your response in Markdown with two sections:
 
 Keep the total response under 200 words. Be warm, specific, and practical.`;
 
+    await consumeBetaAiCall(ctx.user.id);
     try {
       const response = await invokeLLM({
         messages: [
@@ -72,6 +74,7 @@ ${SYMPTOM_GUARDRAILS}
 
 ${logContext}`;
 
+      await consumeBetaAiCall(ctx.user.id);
       try {
         const response = await invokeLLM({
           messages: [
