@@ -31,7 +31,7 @@ export function DeleteAccountCard() {
   });
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border/60 py-0 gap-0">
       <CardHeader className="p-5 border-b border-border/40">
         <CardTitle className="font-serif text-base font-bold">Delete account</CardTitle>
         <CardDescription className="text-xs">
