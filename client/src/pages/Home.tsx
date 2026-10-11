@@ -3,6 +3,7 @@ import { AIChatBox } from "@/components/AIChatBox";
 import { ImageMealLogger } from "@/components/ImageMealLogger";
 import { WaterIntakeCard } from "@/components/WaterIntakeCard";
 import { MealPlanningTab } from "@/components/MealPlanningTab";
+import { DeleteAccountCard } from "@/components/DeleteAccountCard";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { FEATURE_FLAGS } from "@/lib/featureFlags";
@@ -3259,6 +3260,8 @@ export default function Home() {
                 </Button>
               </CardContent>
             </Card>
+
+            <DeleteAccountCard />
           </div>
         )}
 

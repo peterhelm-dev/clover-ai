@@ -1,5 +1,7 @@
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { z } from "zod";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { deleteUserAccount } from "./account-deletion";
 import { nutritionRouter } from "./routers/nutrition";
 import { foodLogsRouter } from "./routers/foodLogs";
 import { healthInsightsRouter } from "./routers/healthInsights";
@@ -30,6 +32,14 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    // Permanently deletes the account and all its data. The client must send
+    // the literal "DELETE" so this can't fire from a stray call.
+    deleteAccount: protectedProcedure
+      .input(z.object({ confirm: z.literal("DELETE") }))
+      .mutation(async ({ ctx }) => {
+        await deleteUserAccount(ctx.user);
+        return { success: true } as const;
+      }),
   }),
 
   nutrition: nutritionRouter,

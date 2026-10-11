@@ -80,8 +80,9 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-semibold text-gray-800 mb-3">5. Data Retention</h2>
             <p className="text-gray-600 leading-relaxed">
               We retain your personal data for as long as your account is active or as needed to provide the Service.
-              You may request deletion of your account and associated data at any time by contacting us. We will
-              respond to deletion requests within 30 days.
+              You can delete your account and associated data at any time from Settings → Delete account in the app.
+              This immediately and permanently removes your profile, meal logs, photos and mood check-ins, and cancels
+              any paid subscription. You may also request deletion by contacting us, and we will respond within 30 days.
             </p>
           </section>
 
