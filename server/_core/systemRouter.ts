@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { notifyOwner } from "./notification";
+import { ENV } from "./env";
 import { adminProcedure, publicProcedure, router } from "./trpc";
 
 export const systemRouter = router({
@@ -12,6 +13,11 @@ export const systemRouter = router({
     .query(() => ({
       ok: true,
     })),
+
+  /** Values the marketing pages need that aren't baked in at build time. */
+  publicConfig: publicProcedure.query(() => ({
+    feedbackUrl: ENV.publicFeedbackUrl,
+  })),
 
   notifyOwner: adminProcedure
     .input(

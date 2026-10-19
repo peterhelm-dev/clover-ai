@@ -41,7 +41,7 @@ export const primaryGoalEnum = pgEnum("primary_goal", [
   "digestive_health",
   "general_awareness",
 ]);
-/** "beta" = the paid 7-day tester program: its own capped tier, auto-reverts to free. */
+/** "beta" = the 7-day early-access tier: its own capped tier, auto-reverts to free. */
 export const tierEnum = pgEnum("tier", ["free", "plus", "pro", "beta"]);
 export const referralStatusEnum = pgEnum("referral_status", ["pending", "credited"]);
 export const feedbackCategoryEnum = pgEnum("feedback_category", [
@@ -96,6 +96,15 @@ export const users = pgTable("users", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+  /**
+   * First-touch acquisition, written once when the row is created.
+   * Null for accounts created before this existed, or visits with no UTM/referrer.
+   */
+  utmSource: varchar("utmSource", { length: 128 }),
+  utmMedium: varchar("utmMedium", { length: 128 }),
+  utmCampaign: varchar("utmCampaign", { length: 128 }),
+  /** External referrer origin + path. Query strings are never stored. */
+  acquisitionReferrer: varchar("acquisitionReferrer", { length: 512 }),
 });
 
 export type User = typeof users.$inferSelect;
@@ -262,7 +271,7 @@ export const appSettings = pgTable("appSettings", {
   id: serial("id").primaryKey(),
   /** If true, only users with valid beta invites can sign up */
   inviteOnly: integer("inviteOnly").default(0).notNull(), // 0=false, 1=true
-  /** Paid beta program: how many testers the public /join link accepts in total. */
+  /** How many people the public /join link accepts in total. Not a payout. */
   betaSpots: integer("betaSpots").default(20).notNull(),
   /** 1 = the /join link accepts new testers (until spots run out); 0 = closed. */
   betaOpen: integer("betaOpen").default(1).notNull(),
@@ -420,9 +429,10 @@ export const accessPassRedemptions = pgTable(
 export type AccessPassRedemption = typeof accessPassRedemptions.$inferSelect;
 
 // ---------------------------------------------------------------------------
-// Paid beta program — one row per tester who joined via the public /join link.
-// The 7-day window, AI caps, daily emails, final feedback and the $25 payout
-// all hang off this row. The user's subscription tier is "beta" while active.
+// Early-access program — one row per person who joined via the public /join link.
+// The 7-day window, AI caps, daily emails and final feedback hang off this row.
+// Cash payouts are off (BETA_PAYOUT_USD = 0); the payout columns stay for a
+// past or future paid round. The user's subscription tier is "beta" while active.
 // ---------------------------------------------------------------------------
 export const betaStatusEnum = pgEnum("beta_status", ["active", "ended"]);
 export const payoutMethodEnum = pgEnum("payout_method", ["paypal", "venmo"]);

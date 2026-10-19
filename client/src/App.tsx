@@ -1,21 +1,31 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import LandingPage from "./pages/LandingPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import BetaInvitePage from "./pages/BetaInvitePage";
-import PassRedeemPage from "./pages/PassRedeemPage";
-import LoginPage from "./pages/LoginPage";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
 import FeedbackButton from "./components/FeedbackButton";
-import JoinBetaPage from "./pages/JoinBetaPage";
-import BetaFeedbackPage from "./pages/BetaFeedbackPage";
 import { useAuth } from "./_core/hooks/useAuth";
+
+const Home = lazy(() => import("./pages/Home"));
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const BetaInvitePage = lazy(() => import("./pages/BetaInvitePage"));
+const PassRedeemPage = lazy(() => import("./pages/PassRedeemPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const JoinBetaPage = lazy(() => import("./pages/JoinBetaPage"));
+const BetaFeedbackPage = lazy(() => import("./pages/BetaFeedbackPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+function PageFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-6 h-6 rounded-full border-2 border-green-700 border-t-transparent animate-spin" />
+    </div>
+  );
+}
 
 /**
  * Root route: show the marketing landing page to guests,
@@ -45,6 +55,7 @@ function GlobalFeedbackButton() {
 
 function Router() {
   return (
+    <Suspense fallback={<PageFallback />}>
     <Switch>
       <Route path="/" component={RootRoute} />
       <Route path="/login" component={LoginPage} />
@@ -62,6 +73,7 @@ function Router() {
       {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
+    </Suspense>
   );
 }
 

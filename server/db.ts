@@ -71,6 +71,15 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.isTester = user.isTester;
     }
 
+    // First-touch only. Never overwrite a channel already stored on the row.
+    const attributionFields = ["utmSource", "utmMedium", "utmCampaign", "acquisitionReferrer"] as const;
+    for (const field of attributionFields) {
+      const value = user[field];
+      if (typeof value === "string" && value.length > 0) {
+        values[field] = value;
+      }
+    }
+
     if (!values.lastSignedIn) {
       values.lastSignedIn = new Date();
     }

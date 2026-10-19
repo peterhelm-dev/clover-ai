@@ -84,7 +84,7 @@ export default function AdminDashboard() {
                     : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
-                {tab.replace("_", " ")}
+                {tab === "paid_beta" ? "Early access" : tab.replace("_", " ")}
               </button>
             ))}
           </nav>
@@ -178,6 +178,7 @@ function UsersTab({ page, onPageChange }: { page: number; onPageChange: (p: numb
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
+                  <TableHead>Source</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Tier</TableHead>
                   <TableHead>Trial</TableHead>
@@ -190,7 +191,7 @@ function UsersTab({ page, onPageChange }: { page: number; onPageChange: (p: numb
                 {isLoading
                   ? Array.from({ length: 8 }).map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 7 }).map((__, j) => (
+                        {Array.from({ length: 8 }).map((__, j) => (
                           <TableCell key={j}>
                             <div className="h-4 bg-gray-100 rounded animate-pulse w-20" />
                           </TableCell>
@@ -207,6 +208,16 @@ function UsersTab({ page, onPageChange }: { page: number; onPageChange: (p: numb
                             <div>
                               <p className="font-medium text-gray-900 text-sm">{u.name ?? "—"}</p>
                               <p className="text-xs text-gray-400">{u.email ?? "—"}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="text-sm text-gray-700">{u.utmSource ?? "—"}</p>
+                              {(u.utmMedium || u.utmCampaign) && (
+                                <p className="text-[10px] text-gray-400">
+                                  {[u.utmMedium, u.utmCampaign].filter(Boolean).join(" / ")}
+                                </p>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>

@@ -65,7 +65,8 @@ async function searchEdamamRecipes(params: {
   });
 
   if (!res.ok) {
-    throw new Error(`Edamam API error: ${res.status} ${res.statusText}`);
+    console.error(`[Recipes] upstream error ${res.status}`);
+    throw new Error("Recipe search is unavailable right now.");
   }
 
   return res.json() as Promise<{

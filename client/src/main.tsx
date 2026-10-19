@@ -7,7 +7,11 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { INVITE_CODE_STORAGE_KEY } from "./const";
+import { captureFirstTouch, attributionHeaders } from "./lib/attribution";
 import "./index.css";
+
+// First visit wins. Must run before anything strips the query string.
+captureFirstTouch();
 
 // After a Supabase OAuth redirect, stash any pending invite code (passed
 // through as a query param) so it can be sent as a header on the first
@@ -67,7 +71,7 @@ const trpcClient = trpc.createClient({
         const token = data.session?.access_token;
         const inviteCode = localStorage.getItem(INVITE_CODE_STORAGE_KEY);
 
-        const headers: Record<string, string> = {};
+        const headers: Record<string, string> = { ...attributionHeaders() };
         if (token) headers.authorization = `Bearer ${token}`;
         if (inviteCode) headers["x-invite-code"] = inviteCode;
         return headers;

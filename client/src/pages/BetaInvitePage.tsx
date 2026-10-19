@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Clock, Sparkles, Zap, MessageSquare, ChefHat } from "lucide-react";
+import { PublicFeedbackLink } from "@/components/PublicFeedbackLink";
 
 export default function BetaInvitePage() {
   const [, params] = useRoute("/beta/:code");
@@ -20,6 +21,7 @@ export default function BetaInvitePage() {
     { code },
     { enabled: !!code }
   );
+  const recipesConfigured = trpc.recipes.isConfigured.useQuery(undefined, { staleTime: 5 * 60_000 });
 
   const redeemMutation = trpc.beta.redeemInvite.useMutation({
     onSuccess: (result) => {
@@ -133,7 +135,9 @@ export default function BetaInvitePage() {
                   { icon: Zap, text: "Unlimited AI nutrition analysis" },
                   { icon: Sparkles, text: "Full Pro features for 30 days" },
                   { icon: MessageSquare, text: "Direct line to share feedback with the team" },
-                  { icon: ChefHat, text: "AI-powered recipe suggestions" },
+                  ...(recipesConfigured.data?.configured
+                    ? [{ icon: ChefHat, text: "AI-powered recipe suggestions" }]
+                    : []),
                   { icon: Clock, text: "No credit card required" },
                 ].map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-3 text-sm text-gray-700">
@@ -182,6 +186,9 @@ export default function BetaInvitePage() {
           </Card>
         </div>
       )}
+      <p className="mt-8 text-sm text-gray-500">
+        <PublicFeedbackLink className="hover:text-emerald-700" />
+      </p>
     </div>
   );
 }

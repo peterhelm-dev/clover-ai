@@ -36,8 +36,10 @@ export function PaidBetaTab() {
     );
   }
 
+  const payoutOn = d.payout > 0;
   const toPay = d.testers.filter((t) => t.qualified && !t.paidAt);
   const active = d.testers.filter((t) => t.status === "active").length;
+  const feedbackIn = d.testers.filter((t) => t.feedbackSubmitted).length;
 
   return (
     <div className="space-y-6">
@@ -79,13 +81,26 @@ export function PaidBetaTab() {
               </Button>
             </form>
           </div>
+          {!payoutOn && (
+            <p className="text-sm text-gray-600">
+              Early access is free. Cash payouts are off, so nothing here is owed. The spot cap and the open switch are the only settings.
+            </p>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-            {[
-              ["Joined", `${d.taken} / ${d.spots}`],
-              ["In their week", active],
-              ["Qualified, unpaid", toPay.length],
-              ["Owed", `$${toPay.reduce((sum, t) => sum + t.payout, 0)}`],
-            ].map(([k, v]) => (
+            {(payoutOn
+              ? [
+                  ["Joined", `${d.taken} / ${d.spots}`],
+                  ["In their week", active],
+                  ["Qualified, unpaid", toPay.length],
+                  ["Owed", `$${toPay.reduce((sum, t) => sum + t.payout, 0)}`],
+                ]
+              : [
+                  ["Joined", `${d.taken} / ${d.spots}`],
+                  ["In their week", active],
+                  ["Feedback in", feedbackIn],
+                  ["Spots left", Math.max(d.spots - d.taken, 0)],
+                ]
+            ).map(([k, v]) => (
               <div key={k} className="rounded-lg bg-gray-50 p-3">
                 <p className="text-xs text-gray-500">{k}</p>
                 <p className="text-lg font-semibold text-gray-900">{v}</p>
@@ -117,7 +132,7 @@ export function PaidBetaTab() {
                       {t.activeDays}/{t.activeDaysRequired} days
                     </Badge>
                     {t.feedbackSubmitted && <Badge variant="secondary">Feedback ✓</Badge>}
-                    {t.paidAt ? <Badge className="bg-emerald-600">Paid</Badge> : t.qualified && <Badge className="bg-amber-500">To pay</Badge>}
+                    {payoutOn && (t.paidAt ? <Badge className="bg-emerald-600">Paid</Badge> : t.qualified && <Badge className="bg-amber-500">To pay</Badge>)}
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
@@ -145,7 +160,7 @@ export function PaidBetaTab() {
                   ) : (
                     <p className="text-gray-500">No final feedback yet.</p>
                   )}
-                  {t.qualified && (
+                  {payoutOn && t.qualified && (
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-amber-50 p-3">
                       <span>
                         Pay <strong>${t.payout}</strong> via <span className="capitalize">{t.payoutMethod}</span>: <strong className="font-mono">{t.payoutHandle}</strong>

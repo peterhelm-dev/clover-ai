@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { Leaf, ArrowLeft } from "lucide-react";
+import { PublicFeedbackLink } from "@/components/PublicFeedbackLink";
 
 export default function PrivacyPolicy() {
   return (
@@ -148,6 +149,7 @@ export default function PrivacyPolicy() {
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-gray-600 transition-colors font-medium text-gray-600">Privacy Policy</Link>
             <Link href="/tos" className="hover:text-gray-600 transition-colors">Terms of Service</Link>
+            <PublicFeedbackLink className="hover:text-gray-600 transition-colors" />
           </div>
         </div>
       </footer>
