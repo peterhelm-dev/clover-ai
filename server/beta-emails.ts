@@ -24,7 +24,7 @@ const DAILY: { subject: string; idea: string }[] = [
   { subject: "Day 6: look back", idea: "Open Past logs and My stats. Is anything confusing, wrong or missing? The Feedback button at the top is perfect for quick notes." },
   {
     subject: "Last day of your Clover beta",
-    idea: "Log as you normally would today. Tomorrow we'll send a short final feedback form (about 2 minutes) — that's the last step for your $" + BETA_PAYOUT_USD + ".",
+    idea: "Log as you normally would today, then take two minutes for the feedback form. That's the last thing we ask.",
   },
 ];
 
@@ -54,14 +54,20 @@ export function dailyEmail(userId: number, day: number, activeDays: number, firs
     activeDays >= BETA_ACTIVE_DAYS_REQUIRED
       ? `You've already used Clover on ${activeDays} days — that covers the ${BETA_ACTIVE_DAYS_REQUIRED} we ask for. Thank you!`
       : `So far you've used Clover on ${activeDays} of the ${BETA_ACTIVE_DAYS_REQUIRED} days we ask for.`;
-  const intro =
-    day === 1
-      ? `Thanks for testing Clover this week. Use it on ${BETA_ACTIVE_DAYS_REQUIRED} of the next ${BETA_DAYS} days and fill in a short feedback form at the end, and we'll send you $${BETA_PAYOUT_USD}.`
-      : `Day ${day} of ${BETA_DAYS}. ${progress}`;
+  const paidIntro = `Thanks for testing Clover this week. Use it on ${BETA_ACTIVE_DAYS_REQUIRED} of the next ${BETA_DAYS} days and fill in a short feedback form at the end, and we'll send you $${BETA_PAYOUT_USD}.`;
+  const freeIntro = `Thanks for trying Clover this week. Use it on ${BETA_ACTIVE_DAYS_REQUIRED} of the next ${BETA_DAYS} days. On day ${BETA_DAYS} we'll ask for a short feedback form — no payment, no card.`;
+  const intro = day === 1 ? (BETA_PAYOUT_USD > 0 ? paidIntro : freeIntro) : `Day ${day} of ${BETA_DAYS}. ${progress}`;
+  const feedbackUrl = `${ENV.appUrl}/beta/feedback`;
+  const survey =
+    day >= BETA_DAYS
+      ? p("When you have two minutes, tell us how the week went. It shapes what we fix before launch.") +
+        button("Share feedback", feedbackUrl)
+      : "";
+  const surveyText = day >= BETA_DAYS ? `\n\nShare feedback: ${feedbackUrl}` : "";
   return layout(
     userId,
-    p(hi) + p(intro) + p(`<strong>Today's idea:</strong> ${d.idea}`) + button("Open Clover", ENV.appUrl),
-    `${hi}\n\n${intro}\n\nToday's idea: ${d.idea}\n\nOpen Clover: ${ENV.appUrl}`,
+    p(hi) + p(intro) + p(`<strong>Today's idea:</strong> ${d.idea}`) + survey + button("Open Clover", ENV.appUrl),
+    `${hi}\n\n${intro}\n\nToday's idea: ${d.idea}${surveyText}\n\nOpen Clover: ${ENV.appUrl}`,
     d.subject
   );
 }
@@ -70,9 +76,12 @@ export function endEmail(userId: number, activeDays: number, firstName?: string 
   const hi = firstName ? `Hi ${firstName},` : "Hi there,";
   const url = `${ENV.appUrl}/beta/feedback`;
   const qualified = activeDays >= BETA_ACTIVE_DAYS_REQUIRED;
-  const line = qualified
-    ? `You used Clover on ${activeDays} days — thank you! The last step for your $${BETA_PAYOUT_USD} is a short feedback form (about 2 minutes), where you'll also tell us your PayPal or Venmo.`
-    : `You used Clover on ${activeDays} of the ${BETA_ACTIVE_DAYS_REQUIRED} days the payout needed, so this round doesn't qualify for the $${BETA_PAYOUT_USD} — but your honest feedback would still help a lot, and it takes about 2 minutes.`;
+  const line =
+    BETA_PAYOUT_USD > 0
+      ? qualified
+        ? `You used Clover on ${activeDays} days — thank you! The last step for your $${BETA_PAYOUT_USD} is a short feedback form (about 2 minutes), where you'll also tell us your PayPal or Venmo.`
+        : `You used Clover on ${activeDays} of the ${BETA_ACTIVE_DAYS_REQUIRED} days the payout needed, so this round doesn't qualify for the $${BETA_PAYOUT_USD} — but your honest feedback would still help a lot, and it takes about 2 minutes.`
+      : `You used Clover on ${activeDays} ${activeDays === 1 ? "day" : "days"}. A short feedback form (about 2 minutes) is the last thing we ask, and it decides what we fix before launch.`;
   const subject = reminder ? "Quick reminder: your Clover beta feedback" : "Your Clover beta week is done";
   return layout(
     userId,

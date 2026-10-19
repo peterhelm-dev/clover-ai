@@ -15,8 +15,10 @@ import {
   getEnrollment,
   getProgramAvailability,
   getProgramSettings,
+  isFeedbackOpen,
   isQualified,
   joinBeta,
+  payoutsEnabled,
   utcDay,
 } from "../beta-program";
 import { dailyEmail } from "../beta-emails";
@@ -75,13 +77,13 @@ export const betaProgramRouter = router({
     let e = await getEnrollment(ctx.user.id);
     if (!e) throw new TRPCError({ code: "NOT_FOUND", message: "You're not in the beta." });
     e = await expireIfDue(e);
-    if (e.status !== "ended") {
+    if (!isFeedbackOpen(e)) {
       throw new TRPCError({ code: "PRECONDITION_FAILED", message: "The feedback form opens when your beta week ends." });
     }
     if (e.feedbackSubmittedAt) {
       throw new TRPCError({ code: "CONFLICT", message: "You've already sent your feedback — thank you!" });
     }
-    const eligible = e.activeDays.length >= BETA_ACTIVE_DAYS_REQUIRED;
+    const eligible = payoutsEnabled() && e.activeDays.length >= BETA_ACTIVE_DAYS_REQUIRED;
     if (eligible && (!input.payoutMethod || !input.payoutHandle)) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "Add your PayPal or Venmo so we can send your $" + BETA_PAYOUT_USD + "." });
     }
@@ -129,7 +131,7 @@ export const betaProgramRouter = router({
         paidAt: e.paidAt,
       });
     }
-    return { ...settings, taken: testers.length, testers };
+    return { ...settings, payout: BETA_PAYOUT_USD, taken: testers.length, testers };
   }),
 
   adminUpdateSettings: adminProcedure

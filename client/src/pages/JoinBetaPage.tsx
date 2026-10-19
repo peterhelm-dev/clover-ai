@@ -3,11 +3,13 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getSignInPageUrl } from "@/const";
+import { PublicFeedbackLink } from "@/components/PublicFeedbackLink";
 
 /**
- * /join — the public link for the paid 7-day beta (shared on social media,
- * not linked from the app). Signed-out visitors sign in and come back here;
- * joining is always an explicit "Join beta" tap.
+ * /join — the public early-access link (shared on social media, not linked
+ * from the app). Signed-out visitors sign in and come back here; joining is
+ * always an explicit "Join beta" tap. Cash payouts are off unless the server
+ * reports payout > 0.
  */
 export default function JoinBetaPage() {
   const { isAuthenticated, loading, user } = useAuth();
@@ -26,14 +28,21 @@ export default function JoinBetaPage() {
   });
 
   const a = availability.data;
-  const payout = a?.payout ?? 25;
+  const payout = a?.payout ?? 0;
+  const payoutOn = payout > 0;
   const days = a?.days ?? 7;
   const needed = a?.activeDaysRequired ?? 5;
 
   const steps = [
     { icon: Mic, title: "Log what you eat", body: "Say it, type it or snap a photo. About a minute a day." },
     { icon: CalendarCheck, title: `Use Clover on ${needed} of ${days} days`, body: "Any days you like. We'll send a short email each day with something new to try." },
-    { icon: MessageSquareText, title: "Tell us what you think", body: `A 2-minute form at the end of your week, then $${payout} by PayPal or Venmo.` },
+    {
+      icon: MessageSquareText,
+      title: "Tell us what you think",
+      body: payoutOn
+        ? `A 2-minute form at the end of your week, then $${payout} by PayPal or Venmo.`
+        : "A 2-minute form around day 7. No payment, and we never ask for a card.",
+    },
   ];
 
   const action = () => {
@@ -117,11 +126,11 @@ export default function JoinBetaPage() {
 
         <div className="mt-8 space-y-4">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
-            <Gift className="h-3.5 w-3.5" /> Paid beta
+            <Gift className="h-3.5 w-3.5" /> {payoutOn ? "Paid beta" : "Early access"}
             {a?.open && <span className="font-normal">· {a.spotsLeft} of {a.spots} spots left</span>}
           </span>
           <h1 className="font-serif text-4xl font-semibold leading-tight text-gray-900">
-            Get ${payout} to test Clover for a week
+            {payoutOn ? `Get $${payout} to test Clover for a week` : "Try Clover free for a week"}
           </h1>
           <p className="text-lg leading-relaxed text-gray-700">
             Clover is a calm AI food and mood companion: tell it what you ate, and it quietly builds an honest picture of how you
@@ -151,7 +160,9 @@ export default function JoinBetaPage() {
             `After ${days} days your account moves to the free plan automatically. Nothing to cancel, and we never ask for a card.`,
             `Fair use: up to ${a?.dailyCap ?? 20} AI analyses a day and ${a?.weeklyCap ?? 100} for the week.`,
             "You'll get one short email a day during your week; you can stop them anytime.",
-            "We may decline payment for duplicate or fraudulent accounts. Payments are sent within 7 days of your final feedback.",
+            ...(payoutOn
+              ? ["We may decline payment for duplicate or fraudulent accounts. Payments are sent within 7 days of your final feedback."]
+              : []),
           ].map((t) => (
             <li key={t} className="flex gap-2">
               <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-green-700" /> {t}
@@ -159,7 +170,11 @@ export default function JoinBetaPage() {
           ))}
         </ul>
         <p className="mt-6 text-center text-xs text-gray-400">
-          <a href="/privacy" className="underline">Privacy</a> · <a href="/tos" className="underline">Terms</a>
+          <a href="/privacy" className="underline">Privacy</a>
+          {" · "}
+          <a href="/tos" className="underline">Terms</a>
+          {" · "}
+          <PublicFeedbackLink className="underline" />
         </p>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { GuestSignInButton } from "@/components/GuestSignInButton";
+import { PublicFeedbackLink } from "@/components/PublicFeedbackLink";
 import {
   Mic,
   Camera,
@@ -438,6 +439,7 @@ function Footer() {
             <ul className="space-y-2 text-sm">
               <li><a href="/privacy" className="hover:text-green-400 transition">Privacy Policy</a></li>
               <li><a href="/tos" className="hover:text-green-400 transition">Terms of Service</a></li>
+              <li><PublicFeedbackLink className="hover:text-green-400 transition" /></li>
             </ul>
           </div>
         </div>

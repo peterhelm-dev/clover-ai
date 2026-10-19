@@ -1,4 +1,4 @@
-// Hourly job for the paid beta program. Railway runs one long-lived Node
+// Hourly job for the early-access program. Railway runs one long-lived Node
 // process, so a plain interval is enough; every step is idempotent (claimed
 // with a conditional UPDATE before sending) so overlapping or repeated ticks
 // never double-send.

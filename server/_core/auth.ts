@@ -2,8 +2,10 @@ import { ForbiddenError } from "@shared/_core/errors";
 import { eq } from "drizzle-orm";
 import type { Request } from "express";
 import { appSettings, betaInvites, users, type User } from "../../drizzle/schema";
+import { attributionFromRequest } from "../attribution";
 import * as db from "../db";
 import { getDb } from "../db";
+import { logEvent } from "../events";
 import { ENV } from "./env";
 import { getSupabaseAuthClient } from "./supabaseAdmin";
 
@@ -92,15 +94,34 @@ export async function authenticateRequest(req: Request): Promise<User | null> {
       (supabaseUser.user_metadata?.name as string | undefined) ??
       (isGuest ? "Guest" : null);
 
+    const attribution = attributionFromRequest(req);
     await db.upsertUser({
       openId,
       name,
       email: supabaseUser.email ?? null,
       loginMethod: deriveLoginMethod(supabaseUser),
       lastSignedIn: signedInAt,
+      ...(attribution
+        ? {
+            utmSource: attribution.utmSource,
+            utmMedium: attribution.utmMedium,
+            utmCampaign: attribution.utmCampaign,
+            acquisitionReferrer: attribution.referrer,
+          }
+        : {}),
     });
 
     user = await db.getUserByOpenId(openId);
+
+    if (user && attribution) {
+      void logEvent(user.id, "signup_attribution", {
+        utm_source: attribution.utmSource,
+        utm_medium: attribution.utmMedium,
+        utm_campaign: attribution.utmCampaign,
+        referrer: attribution.referrer,
+        login_method: user.loginMethod,
+      });
+    }
 
     if (user && dbConn && inviteCode) {
       await dbConn

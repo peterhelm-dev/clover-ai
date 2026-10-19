@@ -789,6 +789,7 @@ function ReferralCard() {
 // RecipesTab sub-component (keeps recipe state isolated)
 // ---------------------------------------------------------------------------
 function RecipesTab({ profile }: { profile: { dietaryChoices?: string[] | null; allergies?: string[] | null } | null | undefined }) {
+  const { user } = useAuth();
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState("healthy");
   const [selectedRecipe, setSelectedRecipe] = useState<null | {
@@ -805,9 +806,10 @@ function RecipesTab({ profile }: { profile: { dietaryChoices?: string[] | null; 
     { enabled: configuredQuery.data?.configured === true }
   );
 
-  const isConfigured = configuredQuery.data?.configured;
+  const isConfigured = configuredQuery.data?.configured === true;
   const recipes = recipesQuery.data?.recipes ?? [];
-  const isLoading = recipesQuery.isLoading && configuredQuery.data?.configured;
+  const isLoading = recipesQuery.isLoading && isConfigured;
+  const showSetupNotes = !isConfigured && configuredQuery.isSuccess && user?.role === "admin";
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -821,8 +823,8 @@ function RecipesTab({ profile }: { profile: { dietaryChoices?: string[] | null; 
           <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight">Curated Recipes</h2>
           <p className="text-xs text-muted-foreground mt-1">
             {isConfigured
-              ? "Live recipes from Edamam, filtered to your dietary profile."
-              : "Connect Edamam to get 2M+ recipes filtered to your dietary preferences."}
+              ? "Recipes filtered to your dietary profile."
+              : "Recipe suggestions aren't available right now."}
           </p>
         </div>
         {isConfigured && (
@@ -838,26 +840,25 @@ function RecipesTab({ profile }: { profile: { dietaryChoices?: string[] | null; 
         )}
       </div>
 
-      {/* Not configured — show setup prompt */}
-      {!isConfigured && (
+      {/* Not configured. End users get a quiet empty state. Setup steps stay admin-only. */}
+      {showSetupNotes && (
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="p-8 text-center space-y-4">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto">
               <Apple className="h-6 w-6" />
             </div>
-            <h3 className="font-serif text-lg font-bold">Connect Edamam Recipe API</h3>
+            <h3 className="font-serif text-lg font-bold">Recipes aren't connected</h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Edamam provides access to 2M+ recipes with full nutritional data, filtered automatically
-              by your dietary choices and allergens. A free developer account gives you 10,000 calls/month.
+              This note is only visible to admins. Set EDAMAM_APP_ID and EDAMAM_APP_KEY on the server, then restart. Until then, recipe suggestions stay hidden for everyone else.
             </p>
-            <ol className="text-xs text-left max-w-sm mx-auto space-y-2 text-muted-foreground">
-              <li className="flex gap-2"><span className="font-bold text-primary">1.</span> Sign up at <a href="https://developer.edamam.com" target="_blank" rel="noopener noreferrer" className="underline text-primary">developer.edamam.com</a></li>
-              <li className="flex gap-2"><span className="font-bold text-primary">2.</span> Create a "Recipe Search API" application</li>
-              <li className="flex gap-2"><span className="font-bold text-primary">3.</span> Copy your App ID and App Key</li>
-              <li className="flex gap-2"><span className="font-bold text-primary">4.</span> Add them as <code className="bg-muted px-1 rounded">EDAMAM_APP_ID</code> and <code className="bg-muted px-1 rounded">EDAMAM_APP_KEY</code> in Settings → Secrets</li>
-            </ol>
           </CardContent>
         </Card>
+      )}
+      {!isConfigured && configuredQuery.isSuccess && !showSetupNotes && (
+        <div className="text-center py-16 text-muted-foreground">
+          <Apple className="h-10 w-10 mx-auto opacity-30 mb-3" />
+          <p className="text-sm">Recipe suggestions aren't available right now.</p>
+        </div>
       )}
 
       {/* Loading state */}
@@ -1069,16 +1070,28 @@ export default function Home() {
 
   // ---- UI state ----
   const [activeTab, setActiveTab] = useState<"home" | "dashboard" | "voice-logger" | "calendar" | "weekly-report" | "mood" | "settings" | "recipes" | "mealplan" | "travel" | "integrations" | "billing">("home");
+  const recipesConfiguredQuery = trpc.recipes.isConfigured.useQuery(undefined, {
+    staleTime: 5 * 60_000,
+    enabled: FEATURE_FLAGS.curatedRecipes,
+  });
+  const recipesReady = recipesConfiguredQuery.data?.configured === true;
+  const showRecipesNav = FEATURE_FLAGS.curatedRecipes && (recipesReady || user?.role === "admin");
+
   // Beta-Gated tabs must be unreachable, not just unlinked — if state ever
   // points at one while its flag is off, bounce back to the dashboard.
+  // Recipes stay hidden from everyone except admins until the provider is configured.
   useEffect(() => {
+    if (activeTab === "recipes" && recipesConfiguredQuery.isSuccess && !showRecipesNav) {
+      setActiveTab("home");
+      return;
+    }
     if (
       (activeTab === "travel" && !FEATURE_FLAGS.travelSourcing) ||
       (activeTab === "integrations" && !FEATURE_FLAGS.integrations)
     ) {
       setActiveTab("dashboard");
     }
-  }, [activeTab]);
+  }, [activeTab, recipesConfiguredQuery.isSuccess, showRecipesNav]);
   const [editingLogId, setEditingLogId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<{ foodName: string; quantity: string; calories: string; protein: string; carbs: string; fat: string; fiber: string }>({ foodName: "", quantity: "", calories: "", protein: "", carbs: "", fat: "", fiber: "" });
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -2212,7 +2225,7 @@ export default function Home() {
             <nav className="space-y-0.5">
               {([
                 { id: "dashboard" as const, label: "My Stats", icon: BarChart3 },
-                ...(FEATURE_FLAGS.curatedRecipes ? [{ id: "recipes" as const, label: "Curated Recipes", icon: Apple }] : []),
+                ...(showRecipesNav ? [{ id: "recipes" as const, label: "Curated Recipes", icon: Apple }] : []),
                 ...(FEATURE_FLAGS.mealPlanning ? [{ id: "mealplan" as const, label: "Meal Planning", icon: Wheat }] : []),
                 ...(FEATURE_FLAGS.billing ? [{ id: "billing" as const, label: "Manage Plan", icon: CreditCard }] : []),
               ]).map(({ id, label, icon: Icon }) => (
@@ -2336,7 +2349,7 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Paid beta testers only: day, AI allowance, progress toward payout */}
+            {/* Early-access testers: day, AI allowance, day-7 feedback prompt */}
             <BetaStatusCard />
 
             {/* Quick mood check-in — optional, no streaks, nothing required */}
@@ -3647,7 +3660,14 @@ export default function Home() {
       <MobileTabBar
         activeTab={activeTab}
         onSelect={setActiveTab}
-        moreTabs={["mood", "settings", "dashboard", "recipes", "mealplan", "billing"] as const}
+        moreTabs={[
+          "mood",
+          "settings",
+          "dashboard",
+          ...(showRecipesNav ? ["recipes" as const] : []),
+          "mealplan",
+          "billing",
+        ]}
         weeklyReportReady={weeklyReportReady}
       />
 

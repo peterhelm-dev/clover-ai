@@ -38,7 +38,7 @@ const Field = ({ label, hint, children }: { label: string; hint?: string; childr
   </div>
 );
 
-/** /beta/feedback — the final form that closes out a tester's week (and unlocks the payout). */
+/** /beta/feedback — the end-of-week survey. Opens on day 7. Payout fields only when a payout is configured. */
 export default function BetaFeedbackPage() {
   const { isAuthenticated, loading } = useAuth();
   const status = trpc.betaProgram.status.useQuery(undefined, { enabled: isAuthenticated, retry: false });
@@ -59,7 +59,8 @@ export default function BetaFeedbackPage() {
   const [payoutHandle, setPayoutHandle] = useState("");
 
   const s = status.data;
-  const eligible = !!s && s.activeDays >= s.activeDaysRequired;
+  const payoutOn = !!s && s.payout > 0;
+  const eligible = payoutOn && !!s && s.activeDays >= s.activeDaysRequired;
   const ready =
     rating > 0 && keepUsing && likedMost.trim() && frustrating.trim() && wouldPay && (!eligible || (payoutMethod && payoutHandle.trim().length >= 2));
 
@@ -108,9 +109,9 @@ export default function BetaFeedbackPage() {
         </div>
         <h1 className="font-serif text-3xl font-semibold">Thank you!</h1>
         <p className="text-gray-700">
-          {s.paid
+          {payoutOn && s.paid
             ? `Your $${s.payout} has been sent.`
-            : s.qualified
+            : payoutOn && s.qualified
               ? `You've earned your $${s.payout}. We'll send it within 7 days.`
               : "Your feedback genuinely helps shape Clover before launch."}
         </p>
@@ -120,12 +121,12 @@ export default function BetaFeedbackPage() {
       </div>
     );
   }
-  if (s.status === "active") {
+  if (!s.feedbackOpen) {
     return shell(
       <div className="space-y-3 text-center">
         <h1 className="font-serif text-3xl font-semibold">Almost there</h1>
         <p className="text-gray-600">
-          You're on day {s.day} of {s.days}. This form opens when your week ends, and we'll email you the link.
+          You're on day {s.day} of {s.days}. This form opens on day {s.days}, and we'll email you the link.
         </p>
         <a href="/" className="inline-flex rounded-xl bg-green-700 px-6 py-3 font-semibold text-white">
           Open Clover
@@ -157,7 +158,11 @@ export default function BetaFeedbackPage() {
         <p className="text-gray-600">
           {eligible
             ? `You used Clover on ${s.activeDays} days, so this is the last step for your $${s.payout}. About 2 minutes.`
-            : `You used Clover on ${s.activeDays} of the ${s.activeDaysRequired} days the payout needed, so this round doesn't include the $${s.payout}. Your honest feedback still helps a lot.`}
+            : payoutOn
+              ? `You used Clover on ${s.activeDays} of the ${s.activeDaysRequired} days the payout needed, so this round doesn't include the $${s.payout}. Your honest feedback still helps a lot.`
+              : s.status === "active"
+                ? `You're on day ${s.day} of your early access. This takes about 2 minutes.`
+                : "Your early-access week is wrapped up. This takes about 2 minutes, and it shapes what we build next."}
         </p>
       </div>
 

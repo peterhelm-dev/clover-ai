@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Leaf } from "lucide-react";
+import { PublicFeedbackLink } from "@/components/PublicFeedbackLink";
 
 export default function NotFound() {
   return (
@@ -16,6 +17,9 @@ export default function NotFound() {
       <Link href="/">
         <Button>Return to Home</Button>
       </Link>
+      <p className="mt-6 text-sm text-muted-foreground">
+        <PublicFeedbackLink className="hover:text-foreground transition-colors" />
+      </p>
     </div>
   );
 }

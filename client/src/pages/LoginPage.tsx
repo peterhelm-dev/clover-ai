@@ -3,6 +3,7 @@ import { ArrowLeft, Github, Loader2, Mail, MailCheck } from "lucide-react";
 import { getAuthRedirectUrl, getLoginUrl, INVITE_CODE_STORAGE_KEY, safeReturnPath } from "@/const";
 import { supabase } from "@/lib/supabaseClient";
 import { GuestSignInButton } from "@/components/GuestSignInButton";
+import { PublicFeedbackLink } from "@/components/PublicFeedbackLink";
 import { Input } from "@/components/ui/input";
 
 function readInviteCode(): string | null {
@@ -127,6 +128,9 @@ export default function LoginPage() {
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to home
         </a>
+        <p className="text-center text-sm text-gray-500">
+          <PublicFeedbackLink className="hover:text-green-700 transition" />
+        </p>
       </div>
     </div>
   );

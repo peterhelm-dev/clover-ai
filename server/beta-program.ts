@@ -1,11 +1,10 @@
-// Paid 7-day beta tester program.
+// 7-day early-access program (public /join link).
 //
-// A tester joins through the public /join link, their subscription tier
-// becomes "beta" for 7 days with capped AI usage, they get one email a day,
-// and when the week ends they drop to the free tier automatically and are
-// asked for final feedback. Using Clover on BETA_ACTIVE_DAYS_REQUIRED of the 7
-// days plus submitting that feedback qualifies them for the payout, which the
-// owner sends by hand from the admin panel.
+// Someone joins, their subscription tier becomes "beta" for 7 days with capped
+// AI usage, they get one email a day, and when the week ends they drop to the
+// free tier automatically. The feedback form opens on day 7. Cash payouts are
+// off (BETA_PAYOUT_USD = 0). A value above 0 re-enables the old paid-tester
+// copy and the PayPal/Venmo step; there is no admin setting for the amount.
 
 import { TRPCError } from "@trpc/server";
 import { and, eq, sql } from "drizzle-orm";
@@ -17,8 +16,30 @@ export const BETA_DAYS = 7;
 export const BETA_DAILY_AI_CAP = 20;
 export const BETA_WEEKLY_AI_CAP = 100;
 export const BETA_ACTIVE_DAYS_REQUIRED = 5;
-export const BETA_PAYOUT_USD = 25;
+/**
+ * Dollars promised to a tester who qualifies. 0 disables every user-facing
+ * payout promise (free early access). This is a code default, not an admin
+ * or database setting.
+ */
+export const BETA_PAYOUT_USD = 0;
 export const BETA_DEFAULT_SPOTS = 20;
+
+export function payoutsEnabled(): boolean {
+  return BETA_PAYOUT_USD > 0;
+}
+
+/**
+ * The end-of-week survey opens on day 7 (six full days after they joined)
+ * and stays open after the week ends. Day 1 is the first 24 hours.
+ */
+export function isFeedbackOpen(
+  e: { startedAt: Date | string; status: "active" | "ended" },
+  now = new Date()
+): boolean {
+  if (e.status === "ended") return true;
+  const started = new Date(e.startedAt).getTime();
+  return now.getTime() - started >= (BETA_DAYS - 1) * 86_400_000;
+}
 
 type Db = NonNullable<Awaited<ReturnType<typeof getDb>>>;
 
@@ -202,6 +223,8 @@ export function describeEnrollment(e: BetaEnrollment, now = new Date()) {
     activeDays: e.activeDays?.length ?? 0,
     activeDaysRequired: BETA_ACTIVE_DAYS_REQUIRED,
     feedbackSubmitted: !!e.feedbackSubmittedAt,
+    /** Survey is available from day 7, including while the week is still active. */
+    feedbackOpen: isFeedbackOpen(e, now),
     qualified: isQualified(e),
     paid: !!e.paidAt,
     payout: BETA_PAYOUT_USD,

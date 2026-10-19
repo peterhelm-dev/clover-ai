@@ -13,6 +13,8 @@ import { rateLimit } from "express-rate-limit";
 import { registerStorageProxy } from "./storageProxy";
 import { registerStripeWebhook } from "./stripeWebhook";
 import { appRouter } from "../routers";
+import { registerSeoRoutes } from "../seo";
+import { ENV } from "./env";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -128,10 +130,23 @@ async function startServer() {
     })
   );
 
-  // development mode uses Vite, production mode uses static files
-  if (process.env.NODE_ENV === "development") {
+  // Real robots.txt and sitemap.xml. Must be registered before the SPA
+  // fallback (and before Vite's catch-all in dev), which otherwise returns
+  // index.html for every unknown path.
+  registerSeoRoutes(app, ENV.appUrl);
+
+  // Vite's dev middleware only for local `pnpm dev`. On Railway, serve the
+  // built files even if someone left NODE_ENV=development on the service —
+  // that combination is what shipped the unminified bundle with source paths.
+  const onRailway = Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID);
+  if (process.env.NODE_ENV === "development" && !onRailway) {
     await setupVite(app, server);
   } else {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        `[boot] NODE_ENV=${process.env.NODE_ENV ?? "(unset)"}; serving the production client build.`
+      );
+    }
     serveStatic(app);
   }
 

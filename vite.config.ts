@@ -151,9 +151,23 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusDebugCollector()];
+export default defineConfig(({ command }) => {
+  // `vite build` does not override a NODE_ENV that is already "development"
+  // (Vite only fills NODE_ENV when it is unset). Railway copied that from
+  // .env.example, so the deployed bundle was the development React build
+  // plus data-loc file paths from jsxLocPlugin. Force production here, before
+  // Vite decides isProduction, and never run the dev-only plugins on build.
+  if (command === "build") {
+    process.env.NODE_ENV = "production";
+  }
 
-export default defineConfig({
+  const plugins = [
+    react(),
+    tailwindcss(),
+    ...(command === "serve" ? [jsxLocPlugin(), vitePluginManusDebugCollector()] : []),
+  ];
+
+  return {
   plugins,
   resolve: {
     alias: {
@@ -168,6 +182,9 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    sourcemap: false,
+    minify: "esbuild",
+    cssMinify: true,
   },
   server: {
     host: true,
@@ -185,4 +202,5 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
+};
 });

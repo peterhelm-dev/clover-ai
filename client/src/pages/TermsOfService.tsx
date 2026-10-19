@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { Leaf, ArrowLeft } from "lucide-react";
+import { PublicFeedbackLink } from "@/components/PublicFeedbackLink";
 
 export default function TermsOfService() {
   return (
@@ -179,6 +180,7 @@ export default function TermsOfService() {
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacy Policy</Link>
             <Link href="/tos" className="hover:text-gray-600 transition-colors font-medium text-gray-600">Terms of Service</Link>
+            <PublicFeedbackLink className="hover:text-gray-600 transition-colors" />
           </div>
         </div>
       </footer>

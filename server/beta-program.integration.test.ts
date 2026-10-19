@@ -152,7 +152,7 @@ suite("paid beta program (integration)", () => {
     expect(sent).toHaveLength(0);
   });
 
-  it("final feedback: only after the week, and payout details required when qualified", async () => {
+  it("final feedback: only from day 7, and payout details only when a payout is configured", async () => {
     const u = await makeUser();
     await beta.joinBeta(u, new Date("2026-10-01T09:00:00Z"));
     const caller = appRouter.createCaller({ user: u, req: { headers: {} }, res: {} } as any);
@@ -162,8 +162,14 @@ suite("paid beta program (integration)", () => {
     await db
       .update(schema.betaEnrollments)
       .set({ activeDays: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05"] });
-    await expect(caller.betaProgram.submitFeedback(answers)).rejects.toThrow(/PayPal or Venmo/);
-    const done = await caller.betaProgram.submitFeedback({ ...answers, payoutMethod: "venmo", payoutHandle: "@tester" });
+    const done =
+      beta.BETA_PAYOUT_USD > 0
+        ? await (async () => {
+            await expect(caller.betaProgram.submitFeedback(answers)).rejects.toThrow(/PayPal or Venmo/);
+            return caller.betaProgram.submitFeedback({ ...answers, payoutMethod: "venmo", payoutHandle: "@tester" });
+          })()
+        : await caller.betaProgram.submitFeedback(answers);
+    expect(done.payout).toBe(beta.BETA_PAYOUT_USD);
     expect(done.qualified).toBe(true);
     await expect(caller.betaProgram.submitFeedback({ ...answers, payoutMethod: "venmo", payoutHandle: "@tester" })).rejects.toThrow(
       /already sent/
