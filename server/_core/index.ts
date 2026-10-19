@@ -13,6 +13,7 @@ import { rateLimit } from "express-rate-limit";
 import { registerStorageProxy } from "./storageProxy";
 import { registerStripeWebhook } from "./stripeWebhook";
 import { appRouter } from "../routers";
+import { redirectLegacyHosts } from "../public-url";
 import { registerSeoRoutes } from "../seo";
 import { ENV } from "./env";
 import { createContext } from "./context";
@@ -37,7 +38,9 @@ const aiLimiter = rateLimit({
   max: 30,
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  message: { error: "AI rate limit reached. Please wait a moment before trying again." },
+  message: {
+    error: "AI rate limit reached. Please wait a moment before trying again.",
+  },
   skip: () => process.env.NODE_ENV === "test",
 });
 
@@ -72,21 +75,11 @@ async function startServer() {
   app.set("trust proxy", 1);
   const server = createServer(app);
 
-  // Legacy domains: 301-redirect any visitor arriving via an old hostname
-  // straight to the canonical one, preserving path/query. Needed because
-  // clover-farm-production.up.railway.app was already shared (e.g. on a
-  // resume) before the app moved to clover-ai.up.railway.app — this must
-  // run before literally anything else so it also covers Stripe webhooks,
-  // the API, and static assets, not just page loads.
-  const LEGACY_HOSTS = ["clover-farm-production.up.railway.app"];
-  const CANONICAL_HOST = "clover-ai.up.railway.app";
-  app.use((req, res, next) => {
-    if (LEGACY_HOSTS.includes(req.hostname)) {
-      res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
-      return;
-    }
-    next();
-  });
+  // Old public hostnames 301 to APP_URL, preserving path and query. This
+  // runs first so it covers pages, assets, and the API. It only matches the
+  // previous Railway hostnames, and only when that host differs from APP_URL,
+  // so localhost and a request that is already on the canonical host pass through.
+  app.use(redirectLegacyHosts(ENV.appUrl));
 
   // Register Stripe webhook BEFORE express.json() middleware
   registerStripeWebhook(app);
@@ -106,7 +99,10 @@ async function startServer() {
       return;
     }
     const db = await getDb();
-    await db?.update(betaEnrollments).set({ emailOptOut: 1 }).where(eq(betaEnrollments.userId, userId));
+    await db
+      ?.update(betaEnrollments)
+      .set({ emailOptOut: 1 })
+      .where(eq(betaEnrollments.userId, userId));
     res
       .status(200)
       .send(
@@ -138,16 +134,18 @@ async function startServer() {
   // Vite's dev middleware only for local `pnpm dev`. On Railway, serve the
   // built files even if someone left NODE_ENV=development on the service —
   // that combination is what shipped the unminified bundle with source paths.
-  const onRailway = Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID);
+  const onRailway = Boolean(
+    process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID
+  );
   if (process.env.NODE_ENV === "development" && !onRailway) {
-    await setupVite(app, server);
+    await setupVite(app, server, ENV.appUrl);
   } else {
     if (process.env.NODE_ENV !== "production") {
       console.warn(
         `[boot] NODE_ENV=${process.env.NODE_ENV ?? "(unset)"}; serving the production client build.`
       );
     }
-    serveStatic(app);
+    serveStatic(app, ENV.appUrl);
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");

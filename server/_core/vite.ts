@@ -5,8 +5,9 @@ import { nanoid } from "nanoid";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
+import { applyDocumentUrls } from "../public-url";
 
-export async function setupVite(app: Express, server: Server) {
+export async function setupVite(app: Express, server: Server, appUrl: string) {
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -39,7 +40,8 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx?v=${nanoid()}"`
       );
       const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      const html = applyDocumentUrls(page, appUrl, url);
+      res.status(200).set({ "Content-Type": "text/html" }).end(html);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
@@ -47,7 +49,7 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
-export function serveStatic(app: Express) {
+export function serveStatic(app: Express, appUrl: string) {
   // The bundled server lives in dist/index.js, so the client build is ./public.
   // `tsx server/_core/index.ts` is two levels up from that. Pick whichever exists
   // so a development NODE_ENV on Railway still serves the production files.
@@ -62,10 +64,24 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  const indexPath = path.resolve(distPath, "index.html");
+  const indexTemplate = fs.existsSync(indexPath)
+    ? fs.readFileSync(indexPath, "utf-8")
+    : null;
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  // index: false so "/" is rewritten below with the canonical URL instead of
+  // the on-disk shell, which only knows the homepage.
+  app.use(express.static(distPath, { index: false }));
+
+  app.use("*", (req, res) => {
+    if (!indexTemplate) {
+      res.status(500).send("Client build is missing.");
+      return;
+    }
+    const html = applyDocumentUrls(indexTemplate, appUrl, req.originalUrl);
+    res
+      .status(200)
+      .set({ "Content-Type": "text/html; charset=utf-8" })
+      .send(html);
   });
 }
