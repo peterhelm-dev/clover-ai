@@ -2,7 +2,11 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import express from "express";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { attributionFromVisit, cleanUtm, externalReferrer } from "../shared/attribution";
+import {
+  attributionFromVisit,
+  cleanUtm,
+  externalReferrer,
+} from "../shared/attribution";
 import { isFeedbackOpen, BETA_DAYS, BETA_PAYOUT_USD } from "./beta-program";
 import { dailyEmail, endEmail } from "./beta-emails";
 import { registerSeoRoutes, robotsTxt, sitemapXml } from "./seo";
@@ -25,7 +29,9 @@ describe("free early access defaults", () => {
 
   it("opens the survey on day 7 and not before", () => {
     const startedAt = new Date("2026-10-12T09:00:00Z");
-    const day6 = new Date(startedAt.getTime() + (BETA_DAYS - 1) * 86_400_000 - 1000);
+    const day6 = new Date(
+      startedAt.getTime() + (BETA_DAYS - 1) * 86_400_000 - 1000
+    );
     const day7 = new Date(startedAt.getTime() + (BETA_DAYS - 1) * 86_400_000);
     expect(isFeedbackOpen({ startedAt, status: "active" }, day6)).toBe(false);
     expect(isFeedbackOpen({ startedAt, status: "active" }, day7)).toBe(true);
@@ -40,7 +46,7 @@ describe("attribution", () => {
       utmMedium: "email",
       utmCampaign: "launch_week",
       referrer: "https://news.example/story?token=secret",
-      ownOrigin: "https://clover-ai.up.railway.app",
+      ownOrigin: "https://getclover.app",
     });
     expect(value).toEqual({
       utmSource: "newsletter",
@@ -51,8 +57,15 @@ describe("attribution", () => {
   });
 
   it("ignores same-site referrers and header-breaking characters", () => {
-    expect(externalReferrer("https://clover.test/join?utm_source=x", "https://clover.test")).toBeNull();
-    expect(externalReferrer("javascript:alert(1)", "https://clover.test")).toBeNull();
+    expect(
+      externalReferrer(
+        "https://clover.test/join?utm_source=x",
+        "https://clover.test"
+      )
+    ).toBeNull();
+    expect(
+      externalReferrer("javascript:alert(1)", "https://clover.test")
+    ).toBeNull();
     expect(cleanUtm("ig\r\nSet-Cookie: x")).toBe("igSet-Cookie: x");
     expect(attributionFromVisit({ referrer: "", utmSource: "  " })).toBeNull();
   });
@@ -67,7 +80,10 @@ describe("attribution", () => {
     });
     const { captureFirstTouch } = await import("../client/src/lib/attribution");
     const first = captureFirstTouch(
-      { search: "?utm_source=instagram&utm_medium=social&utm_campaign=launch", origin: "https://clover.test" },
+      {
+        search: "?utm_source=instagram&utm_medium=social&utm_campaign=launch",
+        origin: "https://clover.test",
+      },
       "https://clover.test/join"
     );
     const second = captureFirstTouch(
@@ -87,31 +103,37 @@ describe("robots and sitemap", () => {
 
   beforeAll(async () => {
     const app = express();
-    registerSeoRoutes(app, "https://clover-ai.up.railway.app");
+    registerSeoRoutes(app, "https://getclover.app");
     app.use((_req, res) => {
-      res.type("html").send("<!doctype html><div id=\"root\"></div>");
+      res.type("html").send('<!doctype html><div id="root"></div>');
     });
     server = createServer(app);
-    await new Promise<void>(resolve => server.listen(0, "127.0.0.1", () => resolve()));
+    await new Promise<void>(resolve =>
+      server.listen(0, "127.0.0.1", () => resolve())
+    );
     const { port } = server.address() as AddressInfo;
     base = `http://127.0.0.1:${port}`;
   });
 
   afterAll(async () => {
-    await new Promise<void>((resolve, reject) => server.close(err => (err ? reject(err) : resolve())));
+    await new Promise<void>((resolve, reject) =>
+      server.close(err => (err ? reject(err) : resolve()))
+    );
   });
 
   it("returns the real files instead of the SPA", async () => {
     const robots = await fetch(`${base}/robots.txt`);
     const sitemap = await fetch(`${base}/sitemap.xml`);
     expect(robots.headers.get("content-type")).toMatch(/text\/plain/);
-    expect(sitemap.headers.get("content-type")).toMatch(/application\/xml|text\/xml/);
+    expect(sitemap.headers.get("content-type")).toMatch(
+      /application\/xml|text\/xml/
+    );
     const robotsBody = await robots.text();
     const sitemapBody = await sitemap.text();
-    expect(robotsBody).toBe(robotsTxt("https://clover-ai.up.railway.app"));
-    expect(sitemapBody).toBe(sitemapXml("https://clover-ai.up.railway.app"));
+    expect(robotsBody).toBe(robotsTxt("https://getclover.app"));
+    expect(sitemapBody).toBe(sitemapXml("https://getclover.app"));
     expect(robotsBody).not.toContain("<html");
-    expect(sitemapBody).toContain("<loc>https://clover-ai.up.railway.app/join</loc>");
+    expect(sitemapBody).toContain("<loc>https://getclover.app/join</loc>");
     expect(sitemapBody).not.toContain("<!doctype");
   });
 });

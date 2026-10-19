@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://clover-ai.up.railway.app/sitemap.xml
+Sitemap: https://getclover.app/sitemap.xml
